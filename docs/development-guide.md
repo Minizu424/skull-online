@@ -200,6 +200,65 @@ git checkout -b feature/name-room
 
 ---
 
+## Git ブランチ操作コマンド
+
+### 現在のブランチを確認する
+```bash
+git branch
+```
+
+### 新しいブランチを作って、そのまま移動する
+```bash
+git checkout -b feature/name-room
+```
+
+### 既存のブランチへ移動する
+```bash
+git checkout main
+```
+
+### ブランチ一覧を見る
+```bash
+git branch
+```
+
+### リモートを含めてブランチ一覧を見る
+```bash
+git branch -a
+```
+
+### 作業前に main を最新にする
+```bash
+git checkout main
+git pull
+```
+
+### main を最新にしてから新しいブランチを切る
+```bash
+git checkout main
+git pull
+git checkout -b feature/game-ui
+```
+
+### ブランチを push する
+```bash
+git push -u origin feature/name-room
+```
+
+### 作業後に main へ戻る
+```bash
+git checkout main
+```
+
+---
+
+## ブランチ操作の基本ルール
+- 新しい作業を始める前に `main` を最新にする
+- 作業は `feature/...` ブランチで行う
+- 作業後は push して Pull Request を作る
+- `main` に直接 push しない
+
+
 # 5. コミットルール
 
 ## 5.1 基本方針
