@@ -1,0 +1,90 @@
+.title-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background-color: #1a1a1a;
+  color: white;
+
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-page__volume {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.title-page__content {
+  width: 100%;
+  max-width: 420px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 24px;
+}
+
+.title-page__name-area {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.title-page__name-count {
+  margin: 0;
+
+  font-size: 12px;
+  color: #b0b0b0;
+}
+
+.title-page__buttons {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.title-page__modal {
+  min-width: 280px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.title-page__modal-title {
+  margin: 0 0 8px;
+
+  font-size: 24px;
+}
+
+.title-page__room-id-count {
+  margin: -8px 0 0;
+
+  font-size: 12px;
+  color: #b0b0b0;
+}
+
+.title-page__modal-buttons {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 10px;
+}
