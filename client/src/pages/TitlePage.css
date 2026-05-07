@@ -13,9 +13,9 @@
 }
 
 .title-page__volume {
-  position: absolute;
+  justify-content: center;
   top: 24px;
-  right: 24px;
+  right: 24px; 
 }
 
 .title-page__content {

@@ -84,14 +84,6 @@ export function TitlePage({
 
   return (
     <div className="title-page">
-      <div className="title-page__volume">
-        <VolumeControl
-          volume={volume}
-          setVolume={setVolume}
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-        />
-      </div>
 
       <main className="title-page__content">
         <Logo />
@@ -128,7 +120,16 @@ export function TitlePage({
             ルール説明
           </Button>
         </div>
+        <div className="title-page__volume">
+        <VolumeControl
+          volume={volume}
+          setVolume={setVolume}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+        />
+      </div>
       </main>
+      
 
       {showModal && (
         <Modal onClose={() => setShowModal(false)}>
