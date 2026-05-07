@@ -40,72 +40,29 @@ export function TitlePage({
     }
   }, []);
 
-  // 文字数計算関数
-  const getCharacterCount = (
-    text: string
-  ) => {
-    let count = 0;
 
-    for (const char of text) {
-      // 日本語なら2
-      if (
-        /[^\x00-\x7F]/.test(char)
-      ) {
-        count += 2;
-      } else {
-        count += 1;
-      }
-    }
-
-    return count;
-  };
-
-  // ルームID入力
   const handleNameChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    value: string
   ) => {
-    const value = e.target.value;
-
-    let newValue = "";
-
-    let count = 0;
-
-    for (const char of value) {
-      const charCount =
-        /[^\x00-\x7F]/.test(char)
-          ? 2
-          : 1;
-
-      if (count + charCount > 20) {
-        break;
-      }
-
-      count += charCount;
-
-      newValue += char;
-    }
-
-    setPlayerName(newValue);
+    setPlayerName(value);
 
     localStorage.setItem(
       "playerName",
-      newValue
+      value
     );
   };
 
   const handleRoomIdChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    value: string
   ) => {
-    const value = e.target.value
+    const formattedValue = value
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 6);
   
-    setRoomId(value);
+    setRoomId(formattedValue);
   };
 
-  const currentCount =
-  getCharacterCount(playerName);
 
   const isDisabled =
     playerName.trim() === "";
@@ -138,22 +95,8 @@ export function TitlePage({
           value={playerName}
           onChange={handleNameChange}
           placeholder="プレイヤー名"
+          maxLength={20}
         />
-
-        <div
-          style={{
-            textAlign: "right",
-
-            fontSize: "14px",
-
-            color:
-              currentCount >= 20
-                ? "red"
-                : "#aaaaaa",
-          }}
-        >
-          {currentCount}/20
-        </div>
       </div>
 
       {/* ボタン */}
