@@ -43,3 +43,13 @@
 
   margin-bottom: 30px;
 }
+.room-id-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.copied-text {
+  color: #4caf50;
+  font-weight: bold;
+}

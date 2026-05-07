@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "../components/Button";
 import "../styles/LobbyPage.css";
-
 type Player = {
   id: string;
   name: string;
@@ -18,7 +17,7 @@ export function LobbyPage({
   onBackToTitle,
   onStartGame,
 }: LobbyPageProps) {
-
+  const [copied, setCopied] = useState(false);
   const [players, setPlayers] = useState<Player[]>([
     {
       id: "1",
@@ -64,7 +63,15 @@ export function LobbyPage({
 
     setPlayers(updatedPlayers);
   };
+const copyRoomId = async () => {
+  await navigator.clipboard.writeText("123456");
 
+  setCopied(true);
+
+  setTimeout(() => {
+    setCopied(false);
+  }, 2000);
+};
   // 全員Ready判定
   const allReady =
     players.length >= 3 &&
@@ -75,7 +82,19 @@ export function LobbyPage({
 
       {/* 上部 */}
       <div className="lobby-header">
-        <h2>Room ID : 123456</h2>
+        <div className="room-id-area">
+          <h2>Room ID : 123456</h2>
+
+          <Button onClick={copyRoomId}>
+              Copy
+          </Button>
+
+          {copied && (
+            <span className="copied-text">
+             Copied!
+            </span>
+          )}
+        </div>
         <h2>{players.length} / 4 Players</h2>
       </div>
 
