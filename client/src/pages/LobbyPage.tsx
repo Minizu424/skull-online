@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../components/Button";
 import "../styles/LobbyPage.css";
+import { VolumeControl } from "../components/VolumeControl";
 type Player = {
   id: string;
   name: string;
@@ -18,6 +19,8 @@ export function LobbyPage({
   onStartGame,
 }: LobbyPageProps) {
   const [copied, setCopied] = useState(false);
+  const [volume, setVolume] = useState(50);
+  const [isMuted, setIsMuted] = useState(false);
   const [players, setPlayers] = useState<Player[]>([
     {
       id: "1",
@@ -162,6 +165,14 @@ const copyRoomId = async () => {
         <Button onClick={removeDummyPlayer}>
           ダミー退出
         </Button>
+      </div>
+      <div className="volume-control-area">
+        <VolumeControl
+          volume={volume}
+          setVolume={setVolume}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+        />
       </div>
     </div>
   );
