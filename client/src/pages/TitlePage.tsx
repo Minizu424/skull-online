@@ -120,7 +120,9 @@ export function TitlePage({
             ルール説明
           </Button>
         </div>
-        <div className="title-page__volume">
+      </main>
+      
+      <div className="title-page__volume">
         <VolumeControl
           volume={volume}
           setVolume={setVolume}
@@ -128,8 +130,6 @@ export function TitlePage({
           setIsMuted={setIsMuted}
         />
       </div>
-      </main>
-      
 
       {showModal && (
         <Modal onClose={() => setShowModal(false)}>
