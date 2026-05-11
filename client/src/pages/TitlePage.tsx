@@ -6,7 +6,7 @@ import { TextInput } from "../components/TextInput";
 import { VolumeControl } from "../components/VolumeControl";
 import { Logo } from "../components/Logo";
 
-import "./TitlePage.css";
+import "../styles/TitlePage.css";
 
 type TitlePageProps = {
   onCreateRoom: (roomId: string, playerName: string) => void;
