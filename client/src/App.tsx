@@ -7,17 +7,21 @@ type Page = "title" | "lobby" |"playing";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("title");
-
+  const [playerName, setPlayerName] = useState("");
   return (
     <>
       {currentPage === "title" && (
         <TitlePage
-          onCreateRoom={() => setCurrentPage("playing")}
+           onCreateRoom={(_, name) => {
+              setPlayerName(name);
+              setCurrentPage("lobby");
+          }}
         />
       )}
 
       {currentPage === "lobby" && (
         <LobbyPage
+          playerName={playerName}
           onBackToTitle={() => setCurrentPage("title")}
           onStartGame={() => setCurrentPage("playing")}
         />

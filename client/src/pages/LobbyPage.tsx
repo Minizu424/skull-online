@@ -10,11 +10,13 @@ type Player = {
 };
 
 type LobbyPageProps = {
+  playerName: string;
   onBackToTitle: () => void;
   onStartGame: () => void;
 };
 
 export function LobbyPage({
+  playerName,
   onBackToTitle,
   onStartGame,
 }: LobbyPageProps) {
@@ -24,7 +26,7 @@ export function LobbyPage({
   const [players, setPlayers] = useState<Player[]>([
     {
       id: "1",
-      name: "Ryo",
+      name: playerName,
       isHost: true,
       isReady: false,
     },
