@@ -10,11 +10,13 @@ type Player = {
 };
 
 type LobbyPageProps = {
+  playerName: string;
   onBackToTitle: () => void;
   onStartGame: () => void;
 };
 
 export function LobbyPage({
+  playerName,
   onBackToTitle,
   onStartGame,
 }: LobbyPageProps) {
@@ -24,7 +26,7 @@ export function LobbyPage({
   const [players, setPlayers] = useState<Player[]>([
     {
       id: "1",
-      name: "Ryo",
+      name: playerName,
       isHost: true,
       isReady: false,
     },
@@ -66,6 +68,26 @@ export function LobbyPage({
 
     setPlayers(updatedPlayers);
   };
+  const setAllReady = () => {
+    const updatedPlayers = players.map((player) => {
+      return {
+        ...player,
+        isReady: true,
+      };
+    });
+
+    setPlayers(updatedPlayers);
+  };
+  const setAllNotReady = () => {
+  const updatedPlayers = players.map((player) => {
+    return {
+      ...player,
+      isReady: false,
+    };
+  });
+
+  setPlayers(updatedPlayers);
+};
 const copyRoomId = async () => {
   await navigator.clipboard.writeText("123456");
 
@@ -143,7 +165,12 @@ const copyRoomId = async () => {
         <Button onClick={onBackToTitle}>
           退室
         </Button>
-
+        <Button onClick={setAllReady}>
+          全員Ready
+        </Button>
+        <Button onClick={setAllNotReady}>
+          全員NotReady
+        </Button>
         <Button onClick={toggleReady}>
           Ready切り替え
         </Button>
