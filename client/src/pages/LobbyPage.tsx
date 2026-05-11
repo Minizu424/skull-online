@@ -10,12 +10,14 @@ type Player = {
 };
 
 type LobbyPageProps = {
+  roomId:string;
   playerName: string;
   onBackToTitle: () => void;
   onStartGame: () => void;
 };
 
 export function LobbyPage({
+  roomId,
   playerName,
   onBackToTitle,
   onStartGame,
@@ -89,7 +91,7 @@ export function LobbyPage({
   setPlayers(updatedPlayers);
 };
 const copyRoomId = async () => {
-  await navigator.clipboard.writeText("123456");
+  await navigator.clipboard.writeText(roomId);
 
   setCopied(true);
 
@@ -108,7 +110,7 @@ const copyRoomId = async () => {
       {/* 上部 */}
       <div className="lobby-header">
         <div className="room-id-area">
-          <h2>Room ID : 123456</h2>
+          <h2>Room ID : {roomId}</h2>
 
           <Button onClick={copyRoomId}>
               Copy
