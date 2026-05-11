@@ -32,9 +32,9 @@ export default function App() {
         />
       )}
       {currentPage === "playing" && (
-         <PlayingPage
+        <PlayingPage
           onBackToLobby={() => setCurrentPage("lobby")}
-          />
+        />
       )}
     </>
   );

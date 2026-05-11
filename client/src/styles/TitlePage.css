@@ -26,7 +26,7 @@
 
 .title-page__content {
   width: 100%;
-  max-width: 420px;
+  max-width: 800px;
 
   display: flex;
   flex-direction: column;
@@ -93,4 +93,22 @@
   align-items: center;
 
   gap: 10px;
+}
+
+.title-page__main-logo {
+  width: min(660px, 90vw);
+  max-width: none;
+  height: auto;
+
+  margin-top: 20px;
+  margin-bottom: 40px;
+
+  object-fit: contain;
+}
+
+.title-page {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
