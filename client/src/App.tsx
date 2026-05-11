@@ -12,7 +12,7 @@ export default function App() {
     <>
       {currentPage === "title" && (
         <TitlePage
-          onCreateRoom={() => setCurrentPage("lobby")}
+          onCreateRoom={() => setCurrentPage("playing")}
         />
       )}
 
