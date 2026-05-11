@@ -1,83 +1,260 @@
 import { useState } from "react";
-import { Button } from "../components/Button";
+import { ActionButtons } from "../components/ActionButtons";
+import { HandArea } from "../components/HandArea";
+import { PlayerArea } from "../components/PlayerArea";
 import "../styles/PlayingPage.css";
 
 type PlayingPageProps = {
   onBackToLobby: () => void;
 };
 
-type GamePhase = "placing" | "bidding" | "revealing" | "result";
+type GamePhase =
+  | "placing"
+  | "bidding"
+  | "revealing"
+  | "result";
+
+type CardType =
+  | "rose"
+  | "skull"
+  | "doubleRose";
 
 type Card = {
   id: string;
-  type: "rose" | "skull" | "doubleRose";
+  type: CardType;
   label: string;
 };
 
-export function PlayingPage({ onBackToLobby }: PlayingPageProps) {
-  const [phase] = useState<GamePhase>("placing");
-  const [bid] = useState(0);
-  const [timer] = useState(30);
+type RevealedCard = Card & {
+  revealed: boolean;
+};
 
-  const handCards: Card[] = [
-    { id: "1", type: "rose", label: "Rose" },
-    { id: "2", type: "rose", label: "Rose" },
-    { id: "3", type: "skull", label: "Skull" },
-    { id: "4", type: "doubleRose", label: "W-Rose" },
-  ];
+export function PlayingPage({
+  onBackToLobby,
+}: PlayingPageProps) {
+  const [phase, setPhase] =
+    useState<GamePhase>("placing");
+
+  const [bid, setBid] =
+    useState(0);
+
+  const [timer] =
+    useState(30);
+
+  const [selectedCardId, setSelectedCardId] =
+    useState<string | null>(null);
+
+  const [handCards, setHandCards] =
+    useState<Card[]>([
+      { id: "1", type: "rose", label: "Rose" },
+      { id: "2", type: "rose", label: "Rose" },
+      { id: "3", type: "skull", label: "Skull" },
+      {
+        id: "4",
+        type: "doubleRose",
+        label: "W-Rose",
+      },
+    ]);
+
+  const [placedCards, setPlacedCards] =
+    useState<Card[]>([]);
+
+  const [opponentCards, setOpponentCards] =
+    useState<RevealedCard[]>([
+      {
+        id: "op1",
+        type: "rose",
+        label: "Rose",
+        revealed: false,
+      },
+      {
+        id: "op2",
+        type: "skull",
+        label: "Skull",
+        revealed: false,
+      },
+      {
+        id: "op3",
+        type: "rose",
+        label: "Rose",
+        revealed: false,
+      },
+    ]);
+
+  const selectedCard =
+    handCards.find(
+      (card) =>
+        card.id === selectedCardId
+    );
+
+  const handlePlaceCard = () => {
+    if (!selectedCard) return;
+    if (phase !== "placing") return;
+
+    setPlacedCards([
+      ...placedCards,
+      selectedCard,
+    ]);
+
+    setHandCards(
+      handCards.filter(
+        (card) =>
+          card.id !== selectedCard.id
+      )
+    );
+
+    setSelectedCardId(null);
+  };
+
+  const handleStartBidding = () => {
+    setPhase("bidding");
+
+    if (bid === 0) {
+      setBid(1);
+    }
+  };
+
+  const handleBidDown = () => {
+    if (bid <= 1) return;
+
+    setBid(bid - 1);
+  };
+
+  const handleBidUp = () => {
+    if (bid >= 16) return;
+
+    setBid(bid + 1);
+  };
+
+  const handleStartReveal = () => {
+    setPhase("revealing");
+  };
+
+  const handleRevealOpponentCard = (
+    cardId: string
+  ) => {
+    if (phase !== "revealing") return;
+
+    setOpponentCards((prev) =>
+      prev.map((card) =>
+        card.id === cardId
+          ? {
+              ...card,
+              revealed: true,
+            }
+          : card
+      )
+    );
+  };
 
   return (
     <div className="playing-page">
-      <header className="playing-header">
-        <h1>プレイ画面</h1>
-        <div>Phase: {phase}</div>
-        <div>Timer: {timer}</div>
-      </header>
-
       <main className="playing-board">
-        <section className="player-area top-player">
-          <h2>上プレイヤー</h2>
-          <p>手札: 4 / 場札: 0</p>
-          <p>勝利数: 🌹 0</p>
+        <header className="playing-header">
+          <h1>プレイ画面</h1>
+
+          <div>Phase: {phase}</div>
+
+          <div>Timer: {timer}</div>
+        </header>
+
+        <PlayerArea
+          position="top"
+          name="上プレイヤー"
+          handCount={4}
+          fieldCount={opponentCards.length}
+          winCount={0}
+        />
+
+        <section className="opponent-field">
+          <h2>相手の場</h2>
+
+          <div className="placed-card-stack">
+            {opponentCards.map((card) => (
+              <button
+                key={card.id}
+                className="placed-card"
+                onClick={() =>
+                  handleRevealOpponentCard(card.id)
+                }
+              >
+                {card.revealed
+                  ? card.label
+                  : "裏"}
+              </button>
+            ))}
+          </div>
         </section>
 
-        <section className="player-area left-player">
-          <h2>左プレイヤー</h2>
-          <p>手札: 4 / 場札: 0</p>
-          <p>勝利数: 🌹 0</p>
-        </section>
+        <PlayerArea
+          position="left"
+          name="左プレイヤー"
+          handCount={4}
+          fieldCount={0}
+          winCount={0}
+        />
 
-        <section className="center-field">
-          <h2>中央の場</h2>
-          <p>BID: {bid}</p>
-        </section>
-
-        <section className="player-area right-player">
-          <h2>右プレイヤー</h2>
-          <p>手札: 4 / 場札: 0</p>
-          <p>勝利数: 🌹 0</p>
-        </section>
+        <PlayerArea
+          position="right"
+          name="右プレイヤー"
+          handCount={4}
+          fieldCount={0}
+          winCount={0}
+        />
 
         <section className="my-field">
           <h2>自分の場</h2>
-          <p>伏せカード: 0</p>
+
+          <p>
+            伏せカード: {placedCards.length}
+          </p>
+
+          <p>BID: {bid}</p>
+
+          {phase === "bidding" && (
+            <div className="bid-controls">
+              <button onClick={handleBidDown}>
+                -
+              </button>
+
+              <span>{bid}</span>
+
+              <button onClick={handleBidUp}>
+                +
+              </button>
+
+              <button onClick={handleStartReveal}>
+                めくる
+              </button>
+            </div>
+          )}
+
+          <div className="placed-card-stack">
+            {placedCards.map((card) => (
+              <div
+                key={card.id}
+                className="placed-card"
+              >
+                裏
+              </div>
+            ))}
+          </div>
         </section>
+
+        <HandArea
+          handCards={handCards}
+          selectedCardId={selectedCardId}
+          onSelectCard={setSelectedCardId}
+        />
+
+        <ActionButtons
+          phase={phase}
+          selectedCardId={selectedCardId}
+          onPlaceCard={handlePlaceCard}
+          onStartBidding={handleStartBidding}
+          onBackToLobby={onBackToLobby}
+        />
       </main>
-
-      <section className="hand-area">
-        {handCards.map((card) => (
-          <button className="card-button" key={card.id}>
-            {card.label}
-          </button>
-        ))}
-      </section>
-
-      <footer className="action-area">
-        <Button disabled={phase !== "placing"}>カードを出す</Button>
-        <Button disabled={phase === "revealing"}>宣言する</Button>
-        <Button disabled={phase !== "bidding"}>パスする</Button>
-        <Button onClick={onBackToLobby}>ロビーへ戻る</Button>
-      </footer>
     </div>
   );
 }

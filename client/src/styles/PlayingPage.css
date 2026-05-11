@@ -1,138 +1,196 @@
 .playing-page {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
 
   overflow: hidden;
-
   box-sizing: border-box;
-
-  padding: 12px;
 
   background-color: #1a1a1a;
   color: white;
 
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows:  1fr ;
+  gap: 12px;
 
-  gap: 8px;
+  padding: 12px;
 }
-
 
 .playing-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+}
+
+.playing-header h1 {
+  margin: 0;
+  font-size: 22px;
 }
 
 .playing-board {
-  flex: 1;
+  position: relative;
 
-  display: grid;
-
-  grid-template-columns: 1fr 1.2fr 1fr;
-  grid-template-rows: 0.8fr 1fr 0.8fr;
-
-  gap: 8px;
-
-  align-items: center;
-  justify-items: center;
-}
-
-.top-player {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.left-player {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.center-field {
-  grid-column: 2;
-  grid-row: 2;
-
-  width: 260px;
-  height: 160px;
-
-  border: 2px solid #aaaaaa;
+  border: 2px solid #555;
   border-radius: 16px;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
+  background-color: #202020;
 
-.right-player {
-  grid-column: 3;
-  grid-row: 2;
-}
-
-.my-field {
-  grid-column: 2;
-  grid-row: 3;
-
-  width: 220px;
-  height: 100px;
-
-  border: 2px dashed #888888;
-  border-radius: 12px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  padding-bottom:150px;
 }
 
 .player-area {
-  width: 170px;
-  height: 90px;
+  position: absolute;
 
-  border: 2px solid #666666;
+  width: 190px;
+  height: 110px;
+
+  border: 2px solid #666;
+  border-radius: 14px;
+
+  background-color: #1a1a1a;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.player-area h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.player-area p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.top-player {
+  top: 20px;
+  left: 50%;
+
+  transform: translateX(-50%);
+}
+
+.left-player {
+  left: 24px;
+  top: 45%;
+
+  transform: translateY(-50%);
+}
+
+.right-player {
+  right: 24px;
+  top: 45%;
+
+  transform: translateY(-50%);
+}
+
+.my-field {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 300px;
+  height: 180px;
+
+  border: 2px dashed #888;
+  border-radius: 14px;
+
+  background-color: #181818;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.my-field h2,
+.my-field p {
+  margin: 0;
+}
+
+.hand-area {
+  position: absolute;
+
+  left: 50%;
+  bottom: 20px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.card-button {
+  width: 78px;
+  height: 110px;
+
+  border: 2px solid white;
   border-radius: 12px;
+
+  background-color: #333;
+  color: white;
+
+  cursor: pointer;
+
+  transition: 0.15s;
+}
+
+.card-button:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 12px white;
+}
+
+.card-button.selected {
+  transform: translateY(-10px);
+  box-shadow: 0 0 16px white;
+}
+
+.placed-card-stack {
+  display: flex;
+  gap: 4px;
+}
+
+.placed-card {
+  width: 30px;
+  height: 42px;
+
+  border: 1px solid white;
+  border-radius: 6px;
+
+  background-color: #555;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 12px;
+}
+
+.bid-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-area {
+  position: absolute;
+
+  left: 6px;
+  bottom: 10px;
 
   display: flex;
   flex-direction: column;
 
-  justify-content: center;
-  align-items: center;
-
-  gap: 2px;
-}
-
-.player-area h2,
-.center-field {
-  width: 220px;
-  height: 120px;
-}
-
-.player-area p,
-.center-field p,
-.my-field {
-  width: 180px;
-  height: 80px;
-}
-
-.hand-area {
-  display: flex;
-  justify-content: center;
   gap: 12px;
-}
-
-.card-button {
-  width: 64px;
-  height: 92px;
-
-  font-size: 14px;
-}
-
-.action-area {
-  display: flex;
-  justify-content: center;
-
-  gap: 8px;
-
-  flex-wrap: wrap;
 }
