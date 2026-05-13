@@ -6,7 +6,7 @@ import { TextInput } from "../components/TextInput";
 import { VolumeControl } from "../components/VolumeControl";
 import { Logo } from "../components/Logo";
 import "../styles/TitlePage.css";
-import titleBg from "../assets/back-title.png";
+
 type TitlePageProps = {
   onCreateRoom: (roomId: string, playerName: string) => void;
   onJoinRoom?: (roomId: string, playerName: string) => void;
@@ -82,12 +82,7 @@ export function TitlePage({
   const isJoinDisabled = roomId.length !== 6;
 
   return (
-    <div
-      className="title-page"
-      style={{
-        backgroundImage: `url(${titleBg})`,
-      }}
-    >
+    <div className="title-page">
 
       <main className="title-page__content">
         <Logo />
