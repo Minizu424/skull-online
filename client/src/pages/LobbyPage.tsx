@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Button } from "../components/Button";
 import "../styles/LobbyPage.css";
 import { VolumeControl } from "../components/VolumeControl";
+
 type Player = {
   id: string;
   name: string;
   isHost: boolean;
   isReady: boolean;
+  frameColor: "blue" | "green" | "purple" | "red";
 };
+
 
 type LobbyPageProps = {
   roomId:string;
@@ -17,24 +20,37 @@ type LobbyPageProps = {
 };
 
 export function LobbyPage({
-  roomId,
-  playerName,
-  onBackToTitle,
-  onStartGame,
-}: LobbyPageProps) {
+    roomId,
+    playerName,
+    onBackToTitle,
+    onStartGame,
+  }: LobbyPageProps) {
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(50);
   const [isMuted, setIsMuted] = useState(false);
+
+  const frameColors: Player["frameColor"][] = [
+    "blue",
+    "green",
+    "purple",
+    "red",
+  ];
+
+
   const [players, setPlayers] = useState<Player[]>([
     {
       id: "1",
       name: playerName,
       isHost: true,
       isReady: false,
+      frameColor: frameColors[0],
+      
     },
   ]);
 
+  
   // ダミー入室
+
   const addDummyPlayer = () => {
     if (players.length >= 4) return;
 
@@ -43,6 +59,7 @@ export function LobbyPage({
       name: `Player${players.length + 1}`,
       isHost: false,
       isReady: false,
+      frameColor: frameColors[players.length],
     };
 
     setPlayers([...players, newPlayer]);
@@ -70,6 +87,7 @@ export function LobbyPage({
 
     setPlayers(updatedPlayers);
   };
+
   const setAllReady = () => {
     const updatedPlayers = players.map((player) => {
       return {
@@ -80,25 +98,28 @@ export function LobbyPage({
 
     setPlayers(updatedPlayers);
   };
+
   const setAllNotReady = () => {
-  const updatedPlayers = players.map((player) => {
-    return {
-      ...player,
-      isReady: false,
-    };
-  });
+    const updatedPlayers = players.map((player) => {
+      return {
+        ...player,
+        isReady: false,
+      };
+    });
 
-  setPlayers(updatedPlayers);
-};
-const copyRoomId = async () => {
-  await navigator.clipboard.writeText(roomId);
+    setPlayers(updatedPlayers);
+  };
 
-  setCopied(true);
+  const copyRoomId = async () => {
+    await navigator.clipboard.writeText(roomId);
 
-  setTimeout(() => {
-    setCopied(false);
-  }, 2000);
-};
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
   // 全員Ready判定
   const allReady =
     players.length >= 3 &&
@@ -106,95 +127,101 @@ const copyRoomId = async () => {
 
   return (
     <div className="lobby-page">
-
       {/* 上部 */}
       <div className="lobby-header">
         <div className="room-id-area">
           <h2>Room ID : {roomId}</h2>
 
           <Button onClick={copyRoomId}>
-              Copy
+            Copy
           </Button>
 
           {copied && (
             <span className="copied-text">
-             Copied!
+              Copied!
             </span>
           )}
         </div>
+
         <h2>{players.length} / 4 Players</h2>
       </div>
 
-      {/* プレイヤーカード */}
-      <div className="player-list">
+      <main className="lobby-main">
+        {/* プレイヤーカード */}
+        <div className="player-list">
         {[0, 1, 2, 3].map((slot) => {
           const player = players[slot];
 
           return (
             <div
-              key={slot}
+              key={player ? player.id : `empty-${slot}`}
               className={
                 player
-                  ? player.isReady
-                    ? "player-card ready"
-                    : "player-card"
-                  : "player-card empty"
+                  ? `player-card player-card--filled player-card--${player.frameColor} ${
+                      player.isReady ? "ready" : ""
+                    }`
+                  : "player-card player-card--empty"
               }
             >
               {player ? (
-                <>
+                <div className="player-card__inner">
                   <h3>
                     {player.isHost && "👑 "}
                     {player.name}
                   </h3>
 
                   <p>
-                    {player.isReady
-                      ? "READY"
-                      : "Not Ready"}
+                    {player.isReady ? "READY" : "Not Ready"}
                   </p>
-                </>
+                </div>
               ) : (
-                <h3>Waiting...</h3>
+                <div className="player-card__empty-inner">
+                  <h3>Waiting...</h3>
+                </div>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* メインボタン */}
-      <div className="button-row">
-        <Button onClick={onBackToTitle}>
-          退室
-        </Button>
-        <Button onClick={setAllReady}>
-          全員Ready
-        </Button>
-        <Button onClick={setAllNotReady}>
-          全員NotReady
-        </Button>
-        <Button onClick={toggleReady}>
-          Ready切り替え
-        </Button>
+        {/* メインボタン */}
+        <div className="button-row">
+          <Button onClick={onBackToTitle}>
+            退室
+          </Button>
 
-        <Button
-          onClick={onStartGame}
-          disabled={!allReady}
-        >
-          ゲーム開始
-        </Button>
-      </div>
+          <Button onClick={setAllReady}>
+            全員Ready
+          </Button>
 
-      {/* 開発用 */}
-      <div className="button-row">
-        <Button onClick={addDummyPlayer}>
-          ダミー入室
-        </Button>
+          <Button onClick={setAllNotReady}>
+            全員NotReady
+          </Button>
 
-        <Button onClick={removeDummyPlayer}>
-          ダミー退出
-        </Button>
-      </div>
+          <Button onClick={toggleReady}>
+            Ready切り替え
+          </Button>
+
+          <Button
+            onClick={onStartGame}
+            disabled={!allReady}
+          >
+            ゲーム開始
+          </Button>
+        </div>
+
+        {/* 開発用 */}
+        <div className="button-row">
+          <Button onClick={addDummyPlayer}>
+            ダミー入室
+          </Button>
+
+          <Button onClick={removeDummyPlayer}>
+            ダミー退出
+          </Button>
+        </div>
+      </main>
+
       <div className="volume-control-area">
         <VolumeControl
           volume={volume}

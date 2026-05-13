@@ -28,6 +28,7 @@ type Card = {
 
 type RevealedCard = Card & {
   revealed: boolean;
+  isFlipping?: boolean;
 };
 
 export function PlayingPage({
@@ -140,17 +141,45 @@ export function PlayingPage({
   ) => {
     if (phase != "revealing") return;
 
+    const targetCard =
+      placedCards.find(
+        (card) => card.id === cardId
+      );
+    
+    if(!targetCard) return;
+
+    setFlippingCard(targetCard);
+
     setPlacedCards((prev) =>
       prev.map((card) =>
         card.id === cardId
           ?{
             ...card,
-            revealed: true,
+            isFlipping: true,
            }
           :card
       )
     );
+
+    setTimeout(() => {
+      setPlacedCards((prev) =>
+        prev.map((card) =>
+          card.id === cardId
+            ?{
+              ...card,
+              revealed:true,
+              isFlipping: false,
+            }
+            : card
+        )
+      );
+    },1500);
+
+    setTimeout(() => {
+      setFlippingCard(null);
+    },2300);
   };
+  
 
   const handleRevealOpponentCard = (
     cardId: string
@@ -168,6 +197,9 @@ export function PlayingPage({
       )
     );
   };
+
+  const [flippingCard, setFlippingCard] =
+  useState<RevealedCard | null>(null);
 
   return (
     <div className="playing-page">
@@ -264,19 +296,34 @@ export function PlayingPage({
               return (
                 <button
                   key={card.id}
-                  className="placed-card"
+                  className={`placed-card ${
+                    card.revealed
+                      ? "revealed"
+                      : ""
+                  } ${
+                    card.isFlipping
+                      ? "flipping"
+                      : ""
+                  } ${
+                    canReveal
+                      ? "can-reveal"
+                      : ""
+                  }`}
                   onClick={() =>
                     handleRevealMycard(card.id)
                   }
                   disabled={
                     phase !== "revealing" ||
                     !canReveal ||
-                    card.revealed
+                    card.revealed ||
+                    card.isFlipping
                   }
                 >
-                  {card.revealed
-                    ? card.label
-                    : "裏"}
+                  <span className="card-content">
+                    {card.revealed
+                      ? card.label
+                      : "裏"}
+                  </span>
                 </button>
               );
             })}
@@ -305,6 +352,28 @@ export function PlayingPage({
           </button>
 
         </div>
+
+        {flippingCard && (
+          <div className="flip-ovrelay">
+
+            <div className="flip-card">
+
+              <div className="flip-card-inner">
+                
+                <div className="flip-card-front">
+                  裏
+                </div>
+
+                <div className="flip-card-back">
+                  {flippingCard.label}
+                </div>
+
+              </div> 
+
+          </div>
+        
+        </div>
+        )}  
       </main>
     </div>
   );
