@@ -46,10 +46,10 @@ export default function App() {
       {currentPage === "playing" && (
         <PlayingPage
           onBackToLobby={() => setCurrentPage("lobby")}
-          onGoToResult={() =>
-            setCurrentPage("result")}
+          onGoToResult={() =>setCurrentPage("result")}
         />
       )}
+
       {currentPage === "result" && (
         <ResultPage
           winnerName={playerName}
