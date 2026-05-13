@@ -379,3 +379,72 @@
     transform: scale(1.15);
   }
 }
+
+.bot-field {
+  position: absolute;
+
+  min-width: 180px;
+  min-height: 90px;
+
+  padding: 10px;
+
+  border: 1px solid #666;
+  border-radius: 12px;
+
+  background-color: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bot-field h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.bot-field p {
+  margin: 0;
+  font-size: 12px;
+  color: #f5d26a;
+}
+
+.bot-field--top {
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bot-field--left {
+  left: 40px;
+  top: 60%;
+  transform: translateY(-50%);
+}
+
+.bot-field--right {
+  right: 40px;
+  top: 60%;
+  transform: translateY(-50%);
+}
+
+.playing-message {
+  position: absolute;
+
+  top: 56px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  padding: 8px 18px;
+
+  border-radius: 999px;
+
+  background-color: rgba(0, 0, 0, 0.65);
+  color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  z-index: 20;
+}
