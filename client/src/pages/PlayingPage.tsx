@@ -59,7 +59,7 @@ export function PlayingPage({
     ]);
 
   const [placedCards, setPlacedCards] =
-    useState<Card[]>([]);
+    useState<RevealedCard[]>([]);
 
   const [opponentCards, setOpponentCards] =
     useState<RevealedCard[]>([
@@ -95,7 +95,10 @@ export function PlayingPage({
 
     setPlacedCards([
       ...placedCards,
-      selectedCard,
+      {
+        ...selectedCard,
+        revealed: false,
+      }
     ]);
 
     setHandCards(
@@ -130,6 +133,23 @@ export function PlayingPage({
 
   const handleStartReveal = () => {
     setPhase("revealing");
+  };
+
+  const handleRevealMycard = (
+    cardId: string
+  ) => {
+    if (phase != "revealing") return;
+
+    setPlacedCards((prev) =>
+      prev.map((card) =>
+        card.id === cardId
+          ?{
+            ...card,
+            revealed: true,
+           }
+          :card
+      )
+    );
   };
 
   const handleRevealOpponentCard = (
@@ -232,14 +252,34 @@ export function PlayingPage({
           )}
 
           <div className="placed-card-stack">
-            {placedCards.map((card) => (
-              <div
-                key={card.id}
-                className="placed-card"
-              >
-                裏
-              </div>
-            ))}
+            {placedCards.map((card, index) => {
+              const topUnrevealedIndex =
+                placedCards
+                  .map((c) => c.revealed)
+                  .lastIndexOf(false);
+            
+              const canReveal =
+                index === topUnrevealedIndex;
+            
+              return (
+                <button
+                  key={card.id}
+                  className="placed-card"
+                  onClick={() =>
+                    handleRevealMycard(card.id)
+                  }
+                  disabled={
+                    phase !== "revealing" ||
+                    !canReveal ||
+                    card.revealed
+                  }
+                >
+                  {card.revealed
+                    ? card.label
+                    : "裏"}
+                </button>
+              );
+            })}
           </div>
         </section>
 
