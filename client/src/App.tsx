@@ -2,10 +2,11 @@ import { useState } from "react";
 import { TitlePage } from "./pages/TitlePage";
 import { LobbyPage } from "./pages/LobbyPage";
 import { PlayingPage } from "./pages/PlayingPage";
+import { ResultPage } from "./pages/ResultPage";
 import titleBg from "./assets/back-title.png";
 import "./App.css";
 
-type Page = "title" | "lobby" | "playing";
+type Page = "title" | "lobby" |"playing" | "result";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("title");
@@ -43,8 +44,26 @@ export default function App() {
       )}
 
       {currentPage === "playing" && (
-        <PlayingPage onBackToLobby={() => setCurrentPage("lobby")} />
+        <PlayingPage
+          onBackToLobby={() => setCurrentPage("lobby")}
+          onGoToResult={() =>
+            setCurrentPage("result")}
+        />
+      )}
+      {currentPage === "result" && (
+        <ResultPage
+          winnerName={playerName}
+
+          onRematch={() =>
+            setCurrentPage("lobby")
+          }
+
+          onBackToTitle={() =>
+            setCurrentPage("title")
+          }
+       />
       )}
     </div>
   );
 }
+

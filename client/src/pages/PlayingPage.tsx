@@ -6,6 +6,7 @@ import "../styles/PlayingPage.css";
 
 type PlayingPageProps = {
   onBackToLobby: () => void;
+  onGoToResult: () => void;
 };
 
 type GamePhase =
@@ -31,6 +32,7 @@ type RevealedCard = Card & {
 
 export function PlayingPage({
   onBackToLobby,
+  onGoToResult,
 }: PlayingPageProps) {
   const [phase, setPhase] =
     useState<GamePhase>("placing");
@@ -254,6 +256,15 @@ export function PlayingPage({
           onStartBidding={handleStartBidding}
           onBackToLobby={onBackToLobby}
         />
+        <div className="dev-buttons">
+
+          <button
+            onClick={onGoToResult}
+          >
+            勝利扱い
+          </button>
+
+        </div>
       </main>
     </div>
   );
