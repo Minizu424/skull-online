@@ -107,8 +107,33 @@
 }
 
 .title-page {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-page__content {
+  width: min(90vw, 900px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: clamp(12px, 2vh, 24px);
+}
+
+.title-page__main-logo {
+  width: min(70vw, 760px);
+  max-height: 28vh;
+
+  height: auto;
+  object-fit: contain;
 }
