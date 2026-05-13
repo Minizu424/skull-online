@@ -354,7 +354,7 @@ export function PlayingPage({
         </div>
 
         {flippingCard && (
-          <div className="flip-ovrelay">
+          <div className="flip-overlay">
 
             <div className="flip-card">
 
