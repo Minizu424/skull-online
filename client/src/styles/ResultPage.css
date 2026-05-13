@@ -4,14 +4,6 @@
 
   overflow: hidden;
 
-  background:
-    radial-gradient(
-      circle at center,
-      #3a1010 0%,
-      #170707 50%,
-      #000000 100%
-    );
-
   color: white;
 
   display: flex;
@@ -25,43 +17,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  gap: 24px;
+    transform: translateY(-40px);
+  gap: 12px;
 }
 
 .result-page__title {
-  font-size: 72px;
+  font-size: 96px;
 
-  letter-spacing: 8px;
+  letter-spacing: 12px;
 
   margin: 0;
+  margin-bottom: 10px;
 }
 
 .result-page__skull {
-  font-size: 160px;
+  font-size: 220px;
+    line-height: 1;
 
+  margin-bottom: 12px;
   filter:
     drop-shadow(
-      0 0 20px rgba(255,0,0,0.5)
+      0 0 24px rgba(255,0,0,0.55)
     );
 }
 
 .result-page__winner-name {
-  font-size: 48px;
+  font-size: 72px;
 
-  margin: 0;
+  margin-top: 8px;
+  margin-bottom: 20px;
 }
 
 .result-page__timer-area {
   text-align: center;
 
   color: #cccccc;
+  margin-bottom: 40px;
+
+  line-height: 1.8;
 }
 
 .result-page__buttons {
   display: flex;
 
-  gap: 20px;
+  gap: 32px;
 }
 
 .result-page__volume {
