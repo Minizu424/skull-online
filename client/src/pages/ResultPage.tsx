@@ -4,7 +4,7 @@ import { Button } from "../components/Button";
 import { VolumeControl } from "../components/VolumeControl";
 
 import "../styles/ResultPage.css";
-
+import resultBg from "../assets/back-result.png";
 type ResultPageProps = {
   winnerName: string;
 
@@ -43,7 +43,11 @@ export function ResultPage({
   }, [timeLeft, onBackToTitle]);
 
   return (
-    <div className="result-page">
+    <div className="result-page"
+        style={{
+            backgroundImage: `url(${resultBg})`,
+        }}
+    >
 
       <main className="result-page__content">
 
