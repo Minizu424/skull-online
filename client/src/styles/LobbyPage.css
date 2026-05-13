@@ -1,68 +1,349 @@
 .lobby-page {
-  min-height: 100vh;
-  background-color: transparent;
+  width: 100vw;
+  height: 100vh;
+
   color: white;
-  padding: 40px;
+
+  padding: 32px 48px;
+  box-sizing: border-box;
+
   position: relative;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby-page::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background-color: rgba(0, 0, 0, 0.35);
+
+  z-index: 0;
+
+  pointer-events: none;
+}
+
+.lobby-header,
+.lobby-main,
+.volume-control-area {
+  position: relative;
+  z-index: 1;
 }
 
 .lobby-header {
+  width: 100%;
+
   display: flex;
   justify-content: space-between;
-  margin-bottom: 40px;
+  align-items: center;
+
+  margin-bottom: 32px;
 }
 
-.player-list {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.player-card {
-  width: 180px;
-  height: 220px;
-
-  border: 2px solid white;
-  border-radius: 12px;
-
-  padding: 16px;
-
-  background-color: #444;
-}
-
-.player-card.ready {
-  background-color: #2e7d32;
-}
-
-.player-card.empty {
-  background-color: #333;
-}
-
-.button-row {
-  display: flex;
-  gap: 20px;
-
-  margin-bottom: 30px;
-}
 .room-id-area {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+.lobby-header h2 {
+  margin: 0;
+
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+}
+
+.lobby-main {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 32px;
+}
+
+.player-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 28px;
+
+  margin-bottom: 0;
+}
+
+/* =========================
+   プレイヤーカード共通
+========================= */
+.player-card {
+  width: 230px;
+  height: 320px;
+
+  box-sizing: border-box;
+
+  color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+
+  position: relative;
+}
+
+/* =========================
+   プレイヤーがいるカード
+========================= */
+.player-card--filled {
+  border: none;
+  border-radius: 0;
+
+  padding: 0;
+
+  background-color: transparent;
+
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+}
+
+/* 枠画像を変数として持たせる */
+.player-card--blue {
+  --frame-image: url("../assets/card_bg_blue.webp");
+}
+
+.player-card--green {
+  --frame-image: url("../assets/card_bg_green.webp");
+}
+
+.player-card--purple {
+  --frame-image: url("../assets/card_bg_purple.webp");
+}
+
+.player-card--red {
+  --frame-image: url("../assets/card_bg_red.webp");
+}
+
+/* 枠画像を一番上に重ねる */
+.player-card--filled::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background-image: var(--frame-image);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: 3;
+
+  pointer-events: none;
+}
+
+/* =========================
+   枠内の塗りつぶし
+========================= */
+.player-card__inner {
+  width: 74%;
+  height: 78%;
+
+  border-radius: 8px;
+
+  background-color: #1f1518;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 18px;
+  box-sizing: border-box;
+
+  text-align: center;
+
+  position: relative;
+  z-index: 1;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.75),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* READYのときは暗めの緑で自然に塗る */
+.player-card.ready .player-card__inner {
+  background:
+    linear-gradient(
+      rgba(54, 132, 82, 0.72),
+      rgba(42, 112, 70, 0.72)
+    );
+
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.35),
+    0 0 12px rgba(67, 210, 122, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* READY時はカード全体も少しだけ光らせる */
+.player-card.ready {
+  filter:
+    drop-shadow(0 0 7px rgba(67, 210, 122, 0.35))
+    drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+}
+
+/* =========================
+   空き枠
+========================= */
+.player-card--empty {
+  border: none;
+  border-radius: 0;
+
+  padding: 0;
+
+  background-color: transparent;
+
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
+}
+
+/* empty枠画像を一番上に重ねる */
+.player-card--empty::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background-image: url("../assets/card_bg_empty.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: 3;
+
+  pointer-events: none;
+}
+
+/* emptyの内側背景 */
+.player-card__empty-inner {
+  width: 74%;
+  height: 78%;
+
+  border-radius: 8px;
+
+  background-color: #1f1518;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-sizing: border-box;
+
+  position: relative;
+  z-index: 1;
+
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.75),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* emptyの文字 */
+.player-card--empty h3 {
+  color: white;
+
+  font-size: 28px;
+
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* =========================
+   カード内テキスト
+========================= */
+.player-card h3 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  white-space: nowrap;
+
+  color: white;
+
+  text-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.95),
+    0 0 6px rgba(0, 0, 0, 0.65);
+}
+
+.player-card p {
+  margin: 0;
+
+  font-size: 22px;
+  line-height: 1.4;
+
+  white-space: nowrap;
+
+  color: white;
+
+  text-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.95),
+    0 0 6px rgba(0, 0, 0, 0.65);
+}
+
+.player-card--empty h3 {
+  color: white;
+
+  font-size: 28px;
+
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* =========================
+   ボタン列
+========================= */
+.button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 20px;
+
+  margin-bottom: 0;
+}
+
+/* =========================
+   コピー表示
+========================= */
 .copied-text {
   color: #4caf50;
   font-weight: bold;
+
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
+
+/* =========================
+   音量UI
+========================= */
 .volume-control-area {
   position: absolute;
 
-  right: 20px;
-  bottom: 20px;
+  right: 24px;
+  bottom: 24px;
 
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.65);
 
   padding: 12px;
 
   border-radius: 12px;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
