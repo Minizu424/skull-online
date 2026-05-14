@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect,useState } from "react";
 import { ActionButtons } from "../components/ActionButtons";
 import { HandArea } from "../components/HandArea";
 import { PlayerArea } from "../components/PlayerArea";
@@ -51,8 +51,23 @@ export function PlayingPage({
   const [bid, setBid] =
     useState(0);
 
-  const [timer] =
+  const [timer, setTimer] =
     useState(30);
+
+  useEffect(() => {
+  if (timer <= 0) {
+    setMessage("時間切れ！");
+    return;
+  }
+
+  const interval = setInterval(() => {
+    setTimer((prev) => prev - 1);
+  }, 1000);
+
+  return () =>
+    clearInterval(interval);
+
+}, [timer]);
 
   const [selectedCardId, setSelectedCardId] =
     useState<string | null>(null);
@@ -317,14 +332,17 @@ export function PlayingPage({
             : card
         )
       );
-
-      handleRevealResult(targetCard);
-    }, 800);
-
+    }, 3400);
+    
     setTimeout(() => {
       setFlippingCard(null);
-    }, 1200);
-  };  
+    }, 4800);
+    
+    setTimeout(() => {
+      handleRevealResult(targetCard);
+    }, 4800);
+  };
+
 
   const handleRevealBotCard = (
     botId: string,
@@ -385,11 +403,11 @@ export function PlayingPage({
       );
 
       handleRevealResult(targetCard);
-    }, 800);
+    }, 2500);
 
     setTimeout(() => {
       setFlippingCard(null);
-    }, 1200);
+    }, 4800);
   };
 
   const handleSuccessfulReveal = (nextRevealedCount: number) => {
@@ -455,6 +473,8 @@ export function PlayingPage({
   const resetRound = (shouldDiscardCard: boolean = false) => {
     setPhase("placing");
     setBid(0);
+
+    setTimer(30);
     setRevealedCount(0);
     setSelectedCardId(null);
 
@@ -495,8 +515,6 @@ export function PlayingPage({
       <main className="playing-board">
 
         <header className="playing-header">
-          <h1>プレイ画面</h1>
-
           <div>Phase: {phase}</div>
 
           <div>Success: {successCount} / 2</div>
@@ -519,67 +537,17 @@ export function PlayingPage({
           />
         ))}
 
-        <section className="bot-fields">
-          {botPlayers.map((bot) => (
-            <div
-              key={bot.id}
-              className={`bot-field bot-field--${bot.position}`}
-            >
-              <h2>{bot.name}の場</h2>
-
-              <p>
-                {bot.passed ? "PASS" : "WAIT"}
-              </p>
-
-              <div className="placed-card-stack">
-                {bot.placedCards.map((card, index) => {
-                  const topUnrevealedIndex =
-                    bot.placedCards
-                      .map((c) => c.revealed)
-                      .lastIndexOf(false);
-
-                  const canReveal =
-                    index === topUnrevealedIndex;
-
-                  return (
-                    <button
-                      key={card.id}
-                      className={`placed-card ${
-                        card.revealed ? "revealed" : ""
-                      } ${
-                        card.isFlipping ? "flipping" : ""
-                      } ${
-                        canReveal ? "can-reveal" : ""
-                      }`}
-                      onClick={() =>
-                        handleRevealBotCard(bot.id, card.id)
-                      }
-                      disabled={
-                        phase !== "revealing" ||
-                        !canReveal ||
-                        card.revealed ||
-                        card.isFlipping
-                      }
-                    >
-                      <span className="card-content">
-                        {card.revealed ? card.label : "裏"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </section>
 
         <section className="my-field">
-          <h2>自分の場</h2>
-
-          <p>
-            伏せカード: {placedCards.length}
-          </p>
-
-          <p>BID: {bid}</p>
+          <div className="field-info">
+            <p>
+              伏せカード: {placedCards.length}
+            </p>
+        
+            <p>
+              BID: {bid}
+            </p>
+          </div>
 
           {phase === "bidding" && (
             <div className="bid-controls">
@@ -599,50 +567,87 @@ export function PlayingPage({
             </div>
           )}
 
-          <div className="placed-card-stack">
-            {placedCards.map((card, index) => {
-              const topUnrevealedIndex =
-                placedCards
-                  .map((c) => c.revealed)
-                  .lastIndexOf(false);
-            
-              const canReveal =
-                index === topUnrevealedIndex;
-            
-              return (
-                <button
-                  key={card.id}
-                  className={`placed-card ${
-                    card.revealed
-                      ? "revealed"
-                      : ""
-                  } ${
-                    card.isFlipping
-                      ? "flipping"
-                      : ""
-                  } ${
-                    canReveal
-                      ? "can-reveal"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    handleRevealMycard(card.id)
-                  }
-                  disabled={
-                    phase !== "revealing" ||
-                    !canReveal ||
-                    card.revealed ||
-                    card.isFlipping
-                  }
+          <div className="table-card-area">
+              {botPlayers.map((bot) => (
+                <div
+                  key={bot.id}
+                  className={`bot-card-stack bot-card-stack--${bot.position}`}
                 >
-                  <span className="card-content">
-                    {card.revealed
-                      ? card.label
-                      : "裏"}
-                  </span>
-                </button>
-              );
-            })}
+                  {bot.placedCards.map((card, index) => {
+                    const topUnrevealedIndex =
+                      bot.placedCards
+                        .map((c) => c.revealed)
+                        .lastIndexOf(false);
+                  
+                    const canReveal =
+                      index === topUnrevealedIndex;
+                  
+                    return (
+                      <button
+                        key={card.id}
+                        className={`placed-card ${
+                          card.revealed ? "revealed" : ""
+                        } ${
+                          card.isFlipping ? "flipping" : ""
+                        } ${
+                          canReveal ? "can-reveal" : ""
+                        }`}
+                        onClick={() =>
+                          handleRevealBotCard(bot.id, card.id)
+                        }
+                        disabled={
+                          phase !== "revealing" ||
+                          !canReveal ||
+                          card.revealed ||
+                          card.isFlipping
+                        }
+                      >
+                        <span className="card-content">
+                          {card.revealed ? card.label : "裏"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+
+              <div className="my-card-stack">
+                {placedCards.map((card, index) => {
+                  const topUnrevealedIndex =
+                    placedCards
+                      .map((c) => c.revealed)
+                      .lastIndexOf(false);
+                
+                  const canReveal =
+                    index === topUnrevealedIndex;
+                
+                  return (
+                    <button
+                      key={card.id}
+                      className={`placed-card ${
+                        card.revealed ? "revealed" : ""
+                      } ${
+                        card.isFlipping ? "flipping" : ""
+                      } ${
+                        canReveal ? "can-reveal" : ""
+                      }`}
+                      onClick={() =>
+                        handleRevealMycard(card.id)
+                      }
+                      disabled={
+                        phase !== "revealing" ||
+                        !canReveal ||
+                        card.revealed ||
+                        card.isFlipping
+                      }
+                    >
+                      <span className="card-content">
+                        {card.revealed ? card.label : "裏"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
           </div>
         </section>
 
