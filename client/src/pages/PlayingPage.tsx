@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Socket } from "socket.io-client";
 import { ActionButtons } from "../components/ActionButtons";
 import { HandArea } from "../components/HandArea";
 import { PlayerArea } from "../components/PlayerArea";
 import "../styles/PlayingPage.css";
 
-type PlayingPageProps = {
-  onBackToLobby: () => void;
-  onGoToResult: () => void;
+type OnlinePlayer = {
+  id: string;
+  name: string;
+  isHost: boolean;
+  isReady: boolean;
+  frameColor: "blue" | "green" | "purple" | "red";
 };
 
 type GamePhase =
@@ -31,27 +35,67 @@ type RevealedCard = Card & {
   isFlipping?: boolean;
 };
 
-type BotPlayer = {
+type PlayingPlayer = {
   id: string;
   name: string;
-  position: "top" | "left" | "right";
   handCards: Card[];
   placedCards: RevealedCard[];
   winCount: number;
   passed: boolean;
 };
 
+type PlayingState = {
+  phase: GamePhase;
+  message: string;
+
+  currentTurnPlayerId: string;
+  turnOrder: string[];
+
+  bid: number;
+  highestBidderId: string | null;
+
+  revealedRoseCount?: number;
+
+  players: PlayingPlayer[];
+};
+
+type PlayingPageProps = {
+  socket: Socket;
+  roomId: string;
+  playerName: string;
+  players: OnlinePlayer[];
+  playingState: PlayingState | null;
+  onBackToLobby: () => void;
+  onGoToResult: () => void;
+  onGameWon: (winnerName: string) => void;
+};
+
+const onlinePlayerPositions: Array<"top" | "left" | "right"> = [
+  "left",
+  "top",
+  "right",
+];
+
 export function PlayingPage({
+  socket,
+  roomId,
+  playerName,
+  players,
+  playingState,
   onBackToLobby,
   onGoToResult,
+  onGameWon,
 }: PlayingPageProps) {
   const [phase, setPhase] =
     useState<GamePhase>("placing");
 
   const [bid, setBid] =
-    useState(0);
+    useState(1);
 
-  const [timer] =
+  const [isChoosingBid, setIsChoosingBid] =
+    useState(false);
+
+  const [timer, setTimer] =
     useState(30);
 
   const [selectedCardId, setSelectedCardId] =
@@ -59,9 +103,21 @@ export function PlayingPage({
 
   const [handCards, setHandCards] =
     useState<Card[]>([
-      { id: "1", type: "rose", label: "Rose" },
-      { id: "2", type: "rose", label: "Rose" },
-      { id: "3", type: "skull", label: "Skull" },
+      {
+        id: "1",
+        type: "rose",
+        label: "Rose",
+      },
+      {
+        id: "2",
+        type: "rose",
+        label: "Rose",
+      },
+      {
+        id: "3",
+        type: "skull",
+        label: "Skull",
+      },
       {
         id: "4",
         type: "doubleRose",
@@ -72,86 +128,189 @@ export function PlayingPage({
   const [placedCards, setPlacedCards] =
     useState<RevealedCard[]>([]);
 
-  const createBotDeck = (botId: string): Card[] => [
-    {
-      id: `${botId}-rose-1`,
-      type: "rose",
-      label: "Rose",
-    },
-    {
-      id: `${botId}-rose-2`,
-      type: "rose",
-      label: "Rose",
-    },
-    {
-      id: `${botId}-skull-1`,
-      type: "skull",
-      label: "Skull",
-    },
-    {
-      id: `${botId}-double-1`,
-      type: "doubleRose",
-      label: "W-Rose",
-    },
-  ];
+  
 
-  const [botPlayers, setBotPlayers] =
-    useState<BotPlayer[]>([
-      {
-        id: "bot-top",
-        name: "上プレイヤー",
-        position: "top",
-        handCards: createBotDeck("bot-top"),
-        placedCards: [],
-        winCount: 0,
-        passed: false,
-      },
-      {
-        id: "bot-left",
-        name: "左プレイヤー",
-        position: "left",
-        handCards: createBotDeck("bot-left"),
-        placedCards: [],
-        winCount: 0,
-        passed: false,
-      },
-      {
-        id: "bot-right",
-        name: "右プレイヤー",
-        position: "right",
-        handCards: createBotDeck("bot-right"),
-        placedCards: [],
-        winCount: 0,
-        passed: false,
-      },
-    ]);
-
-  const [successCount, setSuccessCount] = useState(0);
-  const [revealedCount, setRevealedCount] = useState(0);
   const [message, setMessage] =
     useState("カードを1枚出してください");
 
-  const selectedCard =
-    handCards.find(
-      (card) =>
-        card.id === selectedCardId
+  const [flippingCard, setFlippingCard] =
+    useState<RevealedCard | null>(null);
+
+  const myPlayingPlayer =
+    playingState?.players.find(
+      (player) => player.id === socket.id
+    ) ??
+    playingState?.players.find(
+      (player) => player.name === playerName
     );
 
-  const getRevealPoint = (card: RevealedCard) => {
-    if (card.type === "doubleRose") {
-      return 2;
+  const myPlayerId =
+    myPlayingPlayer?.id ?? socket.id;
+
+  const orderedPlayers =
+    playingState?.players ?? [];
+
+  const myIndex =
+    orderedPlayers.findIndex(
+      (player) => player.id === myPlayerId
+    );
+
+  const otherPlayingPlayers =
+    myIndex === -1
+      ? []
+      : [
+          ...orderedPlayers.slice(myIndex + 1),
+          ...orderedPlayers.slice(0, myIndex),
+        ];
+
+  const displayHandCards =
+    myPlayingPlayer?.handCards ?? handCards;
+
+  const displayPlacedCards =
+    myPlayingPlayer?.placedCards ?? placedCards;
+
+  const totalPlacedCardCount =
+    playingState?.players.reduce(
+      (sum, player) =>
+        sum + player.placedCards.length,
+      0
+    ) ?? placedCards.length;
+
+  const displayPhase =
+    playingState?.phase ?? phase;
+
+  const displayMessage =
+    playingState?.message ?? message;
+
+  const displayBid =
+    playingState?.bid ?? bid;
+
+  const displayRevealedCount =
+    playingState?.revealedRoseCount ?? 0;
+
+  const displayMyWinCount =
+    myPlayingPlayer?.winCount ?? 0;
+
+  const minBid =
+    displayBid + 1;
+
+  const isMyTurn =
+    playingState
+      ? playingState.currentTurnPlayerId === myPlayerId
+      : true;
+
+  const currentTurnPlayer =
+    playingState?.players.find(
+      (player) =>
+        player.id === playingState.currentTurnPlayerId
+    );
+
+  const selectedCard =
+    displayHandCards.find(
+      (card) => card.id === selectedCardId
+    );
+
+  useEffect(() => {
+    if (timer <= 0) {
+      setMessage("時間切れ！");
+      return;
     }
 
-    if (card.type === "rose") {
-      return 1;
-    }
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
 
-    return 0;
-  };
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  useEffect(() => {
+    if (displayPhase !== "placing") {
+      setIsChoosingBid(false);
+    }
+  }, [displayPhase]);
+
+  useEffect(() => {
+    const handleRevealStarted = ({
+      card,
+    }: {
+      targetPlayerId: string;
+      card: RevealedCard;
+    }) => {
+      setFlippingCard(card);
+
+      setTimeout(() => {
+        setFlippingCard(null);
+      }, 4800);
+    };
+
+    socket.on(
+      "playing_card_reveal_started",
+      handleRevealStarted
+    );
+
+    return () => {
+      socket.off(
+        "playing_card_reveal_started",
+        handleRevealStarted
+      );
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    const handleGameWon = ({
+      winnerId,
+      winnerName,
+    }: {
+      winnerId: string;
+      winnerName?: string;
+    }) => {
+      const winner =
+        playingState?.players.find(
+          (player) => player.id === winnerId
+        );
+
+      const fixedWinnerName =
+        winnerName ??
+        winner?.name ??
+        "不明なプレイヤー";
+
+      setMessage(
+        `${fixedWinnerName} が優勝しました！`
+      );
+
+      setTimeout(() => {
+        onGameWon(fixedWinnerName);
+      }, 1000);
+    };
+
+    socket.on("playing_game_won", handleGameWon);
+
+    return () => {
+      socket.off("playing_game_won", handleGameWon);
+    };
+  }, [socket, playingState?.players, onGameWon]);
+
+  
 
   const handlePlaceCard = () => {
     if (!selectedCard) return;
-    if (phase !== "placing") return;
+    if (displayPhase !== "placing") return;
+
+    if (playingState) {
+      if (!isMyTurn) {
+        setMessage("今はあなたのターンではありません");
+        return;
+      }
+
+      socket.emit("playing_place_card", {
+        roomId,
+        cardId: selectedCard.id,
+      });
+
+      setSelectedCardId(null);
+      setIsChoosingBid(false);
+      return;
+    }
 
     const myPlacedCard: RevealedCard = {
       ...selectedCard,
@@ -169,66 +328,84 @@ export function PlayingPage({
       )
     );
 
-    setBotPlayers((prevBots) =>
-      prevBots.map((bot) => {
-        if (bot.handCards.length === 0) {
-          return bot;
-        }
-
-        const randomIndex = Math.floor(
-          Math.random() * bot.handCards.length
-        );
-
-        const selectedBotCard =
-          bot.handCards[randomIndex];
-
-        const botPlacedCard: RevealedCard = {
-          ...selectedBotCard,
-          id: crypto.randomUUID(),
-          revealed: false,
-        };
-
-        return {
-          ...bot,
-          handCards: bot.handCards.filter(
-            (_, index) => index !== randomIndex
-          ),
-          placedCards: [
-            ...bot.placedCards,
-            botPlacedCard,
-          ],
-        };
-      })
-    );
-
     setSelectedCardId(null);
-    setMessage("Botがそれぞれカードを1枚出しました。宣言できます。");
+    setIsChoosingBid(false);
+    setMessage("カードを1枚出しました。宣言できます。");
   };
 
   const handleStartBidding = () => {
-    if (placedCards.length === 0) {
+    if (displayPlacedCards.length === 0) {
       setMessage("先にカードを1枚出してください");
       return;
     }
 
-    setPhase("bidding");
-
-    setBotPlayers((prevBots) =>
-      prevBots.map((bot) => ({
-        ...bot,
-        passed: true,
-      }))
-    );
-
-    if (bid === 0) {
-      setBid(1);
+    if (totalPlacedCardCount === 0) {
+      setMessage("場にカードがありません");
+      return;
     }
 
-    setMessage("あなたが宣言しました。Botは全員パスしました。");
+    if (playingState && !isMyTurn) {
+      setMessage("今はあなたのターンではありません");
+      return;
+    }
+
+    setBid(minBid);
+    setIsChoosingBid(true);
+  };
+
+  const handleConfirmBid = () => {
+    if (!isChoosingBid) return;
+
+    const fixedBid =
+      Math.max(bid, minBid);
+
+    if (fixedBid > 16) {
+      setMessage("宣言数は16までです");
+      return;
+    }
+
+    if (playingState) {
+      if (!isMyTurn) {
+        setMessage("今はあなたのターンではありません");
+        return;
+      }
+
+      socket.emit("playing_start_bidding", {
+        roomId,
+        bid: fixedBid,
+      });
+
+      setIsChoosingBid(false);
+      return;
+    }
+
+    setPhase("bidding");
+    setBid(fixedBid);
+    setMessage(`あなたが ${fixedBid} 枚で宣言しました。`);
+    setIsChoosingBid(false);
+  };
+
+  const handlePass = () => {
+    if (displayPhase !== "bidding") return;
+
+    if (playingState) {
+      if (!isMyTurn) {
+        setMessage("今はあなたのターンではありません");
+        return;
+      }
+
+      socket.emit("playing_pass", {
+        roomId,
+      });
+
+      return;
+    }
+
+    setMessage("パスしました");
   };
 
   const handleBidDown = () => {
-    if (bid <= 1) return;
+    if (bid <= minBid) return;
 
     setBid(bid - 1);
   };
@@ -239,443 +416,286 @@ export function PlayingPage({
     setBid(bid + 1);
   };
 
-  const handleStartReveal = () => {
-    if (bid <= 0) return;
-
-    const myCardsToReveal = placedCards.filter(
-      (card) => !card.revealed
-    );
-
-    if (myCardsToReveal.length === 0) {
-      setMessage("自分の場にカードがありません。");
-      return;
-    }
-
-    setPhase("revealing");
-
-    setPlacedCards((prev) =>
-      prev.map((card) => ({
-        ...card,
-        revealed: true,
-        isFlipping: false,
-      }))
-    );
-
-    const hasSkull = myCardsToReveal.some(
-      (card) => card.type === "skull"
-    );
-
-    if (hasSkull) {
-      setMessage("自分の場にSkullがありました。失敗です。カードを1枚失います。");
-
-      setTimeout(() => {
-        resetRound(true);
-      }, 1000);
-
-      return;
-    }
-
-    const revealedRoseCount = myCardsToReveal.reduce(
-      (sum, card) => sum + getRevealPoint(card),
-      0
-    );
-
-    handleSuccessfulReveal(revealedRoseCount);
-  };
-
   const handleRevealMycard = (cardId: string) => {
-    if (phase !== "revealing") return;
+    if (displayPhase !== "revealing") return;
+    if (!isMyTurn) return;
+    if (!myPlayingPlayer) return;
 
-    const targetCard = placedCards.find(
-      (card) => card.id === cardId
-    );
-
-    if (!targetCard) return;
-
-    setFlippingCard(targetCard);
-
-    setPlacedCards((prev) =>
-      prev.map((card) =>
-        card.id === cardId
-          ? {
-              ...card,
-              isFlipping: true,
-            }
-          : card
-      )
-    );
-
-    setTimeout(() => {
-      setPlacedCards((prev) =>
-        prev.map((card) =>
-          card.id === cardId
-            ? {
-                ...card,
-                revealed: true,
-                isFlipping: false,
-              }
-            : card
-        )
+    const targetCard =
+      displayPlacedCards.find(
+        (card) => card.id === cardId
       );
 
-      handleRevealResult(targetCard);
-    }, 800);
+    if (!targetCard) return;
+    if (targetCard.revealed) return;
 
-    setTimeout(() => {
-      setFlippingCard(null);
-    }, 1200);
-  };  
+    socket.emit("playing_reveal_card", {
+      roomId,
+      targetPlayerId: myPlayingPlayer.id,
+      cardId,
+    });
+  };
 
-  const handleRevealBotCard = (
-    botId: string,
+  const handleRevealOtherCard = (
+    playerId: string,
     cardId: string
   ) => {
-    if (phase !== "revealing") return;
+    if (displayPhase !== "revealing") return;
+    if (!isMyTurn) return;
 
-    const targetBot = botPlayers.find(
-      (bot) => bot.id === botId
-    );
-
-    if (!targetBot) return;
-
-    const targetCard = targetBot.placedCards.find(
-      (card) => card.id === cardId
-    );
-
-    if (!targetCard) return;
-
-    setFlippingCard(targetCard);
-
-    setBotPlayers((prevBots) =>
-      prevBots.map((bot) => {
-        if (bot.id !== botId) return bot;
-
-        return {
-          ...bot,
-          placedCards: bot.placedCards.map((card) =>
-            card.id === cardId
-              ? {
-                  ...card,
-                  isFlipping: true,
-                }
-              : card
-          ),
-        };
-      })
-    );
-
-    setTimeout(() => {
-      setBotPlayers((prevBots) =>
-        prevBots.map((bot) => {
-          if (bot.id !== botId) return bot;
-
-          return {
-            ...bot,
-            placedCards: bot.placedCards.map((card) =>
-              card.id === cardId
-                ? {
-                    ...card,
-                    revealed: true,
-                    isFlipping: false,
-                  }
-                : card
-            ),
-          };
-        })
+    const targetPlayer =
+      otherPlayingPlayers.find(
+        (player) => player.id === playerId
       );
 
-      handleRevealResult(targetCard);
-    }, 800);
+    if (!targetPlayer) return;
 
-    setTimeout(() => {
-      setFlippingCard(null);
-    }, 1200);
-  };
+    const targetCard =
+      targetPlayer.placedCards.find(
+        (card) => card.id === cardId
+      );
 
-  const handleSuccessfulReveal = (nextRevealedCount: number) => {
-    setRevealedCount(nextRevealedCount);
+    if (!targetCard) return;
+    if (targetCard.revealed) return;
 
-    if (nextRevealedCount >= bid) {
-      const nextSuccessCount = successCount + 1;
-      setSuccessCount(nextSuccessCount);
-
-      if (nextSuccessCount >= 2) {
-        setMessage("2回成功しました。勝利です。");
-
-        setTimeout(() => {
-          onGoToResult();
-        }, 1000);
-
-        return;
-      }
-
-      setMessage(`成功！ 現在 ${nextSuccessCount} / 2 成功です。`);
-
-      setTimeout(() => {
-        resetRound(false);
-      }, 1000);
-
-      return;
-    }
-    setMessage(`${nextRevealedCount} / ${bid} ローズめくりました。残りをめくってください。`);
+    socket.emit("playing_reveal_card", {
+      roomId,
+      targetPlayerId: playerId,
+      cardId,
+    });
   };
 
   
 
-  const handleRevealResult = (card: RevealedCard) => {
-    if (card.type === "skull") {
-      setMessage("Skullを引きました。カードを1枚失って次のラウンドへ。");
-
-      setTimeout(() => {
-        resetRound(true);
-      }, 1000);
-
-      return;
-    }
-
-    const nextRevealedCount =
-      revealedCount + getRevealPoint(card);
-
-    handleSuccessfulReveal(nextRevealedCount);
-  };
-
-  const [flippingCard, setFlippingCard] =
-  useState<RevealedCard | null>(null);
-
-  const removeRandomCard = (cards: Card[]) => {
-    if (cards.length === 0) {
-      return cards;
-    }
-
-    const randomIndex = Math.floor(Math.random() * cards.length);
-
-    return cards.filter((_, index) => index !== randomIndex);
-  };
-
-  const resetRound = (shouldDiscardCard: boolean = false) => {
-    setPhase("placing");
-    setBid(0);
-    setRevealedCount(0);
-    setSelectedCardId(null);
-
-    const returnedCards: Card[] = placedCards.map((card) => ({
-      id: card.id,
-      type: card.type,
-      label: card.label,
-    }));
-
-    const nextHandCards = [
-      ...handCards,
-      ...returnedCards,
-    ];
-
-    setHandCards(
-      shouldDiscardCard
-        ? removeRandomCard(nextHandCards)
-        : nextHandCards
-    );
-
-    setPlacedCards([]);
-
-    setBotPlayers((prevBots) =>
-      prevBots.map((bot) => ({
-        ...bot,
-        handCards: createBotDeck(bot.id),
-        placedCards: [],
-        passed: false,
-      }))
-    );
-
-    setMessage("カードを1枚出してください");
-  };
   
+  
+
+  
+
   return (
     <div className="playing-page">
-
       <main className="playing-board">
-
         <header className="playing-header">
-          <h1>プレイ画面</h1>
+          <div>Room: {roomId}</div>
 
-          <div>Phase: {phase}</div>
+          <div>You: {playerName}</div>
 
-          <div>Success: {successCount} / 2</div>
+          <div>Players: {players.length}</div>
+
+          <div>
+            Turn:{" "}
+            {isMyTurn
+              ? "あなた"
+              : currentTurnPlayer?.name ?? "不明"}
+          </div>
+
+          <div>Phase: {displayPhase}</div>
+
+          <div>宣言数: {displayBid}</div>
+
+          <div>
+            めくったRose: {displayRevealedCount} / {displayBid}
+          </div>
+
+          <div>
+            勝ち点: {displayMyWinCount} / 2
+          </div>
 
           <div>Timer: {timer}</div>
         </header>
 
         <div className="playing-message">
-          {message}
+          {displayMessage}
         </div>
 
-        {botPlayers.map((bot) => (
+        {otherPlayingPlayers.map((player, index) => (
           <PlayerArea
-            key={bot.id}
-            position={bot.position}
-            name={bot.name}
-            handCount={bot.handCards.length}
-            fieldCount={bot.placedCards.length}
-            winCount={bot.winCount}
+            key={player.id}
+            position={onlinePlayerPositions[index]}
+            name={player.name}
+            handCount={player.handCards.length}
+            fieldCount={player.placedCards.length}
+            winCount={player.winCount}
           />
         ))}
 
-        <section className="bot-fields">
-          {botPlayers.map((bot) => (
-            <div
-              key={bot.id}
-              className={`bot-field bot-field--${bot.position}`}
-            >
-              <h2>{bot.name}の場</h2>
-
-              <p>
-                {bot.passed ? "PASS" : "WAIT"}
-              </p>
-
-              <div className="placed-card-stack">
-                {bot.placedCards.map((card, index) => {
-                  const topUnrevealedIndex =
-                    bot.placedCards
-                      .map((c) => c.revealed)
-                      .lastIndexOf(false);
-
-                  const canReveal =
-                    index === topUnrevealedIndex;
-
-                  return (
-                    <button
-                      key={card.id}
-                      className={`placed-card ${
-                        card.revealed ? "revealed" : ""
-                      } ${
-                        card.isFlipping ? "flipping" : ""
-                      } ${
-                        canReveal ? "can-reveal" : ""
-                      }`}
-                      onClick={() =>
-                        handleRevealBotCard(bot.id, card.id)
-                      }
-                      disabled={
-                        phase !== "revealing" ||
-                        !canReveal ||
-                        card.revealed ||
-                        card.isFlipping
-                      }
-                    >
-                      <span className="card-content">
-                        {card.revealed ? card.label : "裏"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </section>
-
         <section className="my-field">
-          <h2>自分の場</h2>
+          <div className="field-info">
+            <p>
+              伏せカード: {totalPlacedCardCount}
+            </p>
 
-          <p>
-            伏せカード: {placedCards.length}
-          </p>
+            <p>
+              宣言数: {isChoosingBid ? bid : displayBid}
+            </p>
+          </div>
 
-          <p>BID: {bid}</p>
-
-          {phase === "bidding" && (
+          {isChoosingBid && isMyTurn && (
             <div className="bid-controls">
-              <button onClick={handleBidDown}>
+              <button
+                onClick={handleBidDown}
+                disabled={bid <= minBid}
+              >
                 -
               </button>
 
               <span>{bid}</span>
 
-              <button onClick={handleBidUp}>
+              <button
+                onClick={handleBidUp}
+                disabled={bid >= 16}
+              >
                 +
               </button>
 
-              <button onClick={handleStartReveal}>
-                宣言する
+              <button onClick={handleConfirmBid}>
+                この枚数で宣言
               </button>
             </div>
           )}
 
-          <div className="placed-card-stack">
-            {placedCards.map((card, index) => {
-              const topUnrevealedIndex =
-                placedCards
-                  .map((c) => c.revealed)
-                  .lastIndexOf(false);
-            
-              const canReveal =
-                index === topUnrevealedIndex;
-            
-              return (
-                <button
-                  key={card.id}
-                  className={`placed-card ${
-                    card.revealed
-                      ? "revealed"
-                      : ""
-                  } ${
-                    card.isFlipping
-                      ? "flipping"
-                      : ""
-                  } ${
-                    canReveal
-                      ? "can-reveal"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    handleRevealMycard(card.id)
-                  }
-                  disabled={
-                    phase !== "revealing" ||
-                    !canReveal ||
-                    card.revealed ||
-                    card.isFlipping
-                  }
-                >
-                  <span className="card-content">
-                    {card.revealed
-                      ? card.label
-                      : "裏"}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="table-card-area">
+            {otherPlayingPlayers.map(
+              (player, playerIndex) => {
+                const position =
+                  onlinePlayerPositions[playerIndex];
+
+                return (
+                  <div
+                    key={player.id}
+                    className={`bot-card-stack bot-card-stack--${position}`}
+                  >
+                    {player.placedCards.map(
+                      (card, cardIndex) => {
+                        const topUnrevealedIndex =
+                          player.placedCards
+                            .map((c) => c.revealed)
+                            .lastIndexOf(false);
+
+                        const canReveal =
+                          cardIndex ===
+                          topUnrevealedIndex;
+
+                        return (
+                          <button
+                            key={card.id}
+                            className={`placed-card ${
+                              card.revealed
+                                ? "revealed"
+                                : ""
+                            } ${
+                              card.isFlipping
+                                ? "flipping"
+                                : ""
+                            } ${
+                              canReveal
+                                ? "can-reveal"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              handleRevealOtherCard(
+                                player.id,
+                                card.id
+                              )
+                            }
+                            disabled={
+                              displayPhase !==
+                                "revealing" ||
+                              !isMyTurn ||
+                              !canReveal ||
+                              card.revealed ||
+                              card.isFlipping
+                            }
+                          >
+                            <span className="card-content">
+                              {card.revealed
+                                ? card.label
+                                : "裏"}
+                            </span>
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                );
+              }
+            )}
+
+            <div className="my-card-stack">
+              {displayPlacedCards.map((card, index) => {
+                const topUnrevealedIndex =
+                  displayPlacedCards
+                    .map((c) => c.revealed)
+                    .lastIndexOf(false);
+
+                const canReveal =
+                  index === topUnrevealedIndex;
+
+                return (
+                  <button
+                    key={card.id}
+                    className={`placed-card ${
+                      card.revealed
+                        ? "revealed"
+                        : ""
+                    } ${
+                      card.isFlipping
+                        ? "flipping"
+                        : ""
+                    } ${
+                      canReveal
+                        ? "can-reveal"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleRevealMycard(card.id)
+                    }
+                    disabled={
+                      displayPhase !== "revealing" ||
+                      !isMyTurn ||
+                      !canReveal ||
+                      card.revealed ||
+                      card.isFlipping
+                    }
+                  >
+                    <span className="card-content">
+                      {card.revealed
+                        ? card.label
+                        : "裏"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </section>
 
         <HandArea
-          handCards={handCards}
+          handCards={displayHandCards}
           selectedCardId={selectedCardId}
           onSelectCard={setSelectedCardId}
         />
 
         <ActionButtons
-          phase={phase}
+          phase={displayPhase}
           selectedCardId={selectedCardId}
+          isMyTurn={isMyTurn}
           onPlaceCard={handlePlaceCard}
           onStartBidding={handleStartBidding}
+          onPass={handlePass}
           onBackToLobby={onBackToLobby}
         />
-        <div className="dev-buttons">
 
-          <button
-            onClick={onGoToResult}
-          >
+        <div className="dev-buttons">
+          <button onClick={onGoToResult}>
             勝利扱い
           </button>
-
         </div>
 
         {flippingCard && (
           <div className="flip-overlay">
-
             <div className="flip-card">
-
               <div className="flip-card-inner">
-                
                 <div className="flip-card-front">
                   裏
                 </div>
@@ -683,13 +703,10 @@ export function PlayingPage({
                 <div className="flip-card-back">
                   {flippingCard.label}
                 </div>
-
-              </div> 
-
+              </div>
+            </div>
           </div>
-        
-        </div>
-        )}  
+        )}
       </main>
     </div>
   );

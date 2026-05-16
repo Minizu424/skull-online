@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import { socket } from "./socket";
 import { TitlePage } from "./pages/TitlePage";
 import { LobbyPage } from "./pages/LobbyPage";
 import { PlayingPage } from "./pages/PlayingPage";
 import { ResultPage } from "./pages/ResultPage";
 import titleBg from "./assets/back-title.png";
 import "./App.css";
-
-// 接続先を最新のNetwork IPに設定
-const socket = io("http://10.160.90.44:3001");
 
 type Page = "title" | "lobby" | "playing" | "result";
 
@@ -20,54 +17,161 @@ type Player = {
   frameColor: "blue" | "green" | "purple" | "red";
 };
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>("title");
-  const [playerName, setPlayerName] = useState("");
-  const [roomId, setRoomId] = useState("");
-  const [players, setPlayers] = useState<Player[]>([]);
+type CardType =
+  | "rose"
+  | "skull"
+  | "doubleRose";
 
-  const shouldShowBackground = currentPage !== "playing";
+type Card = {
+  id: string;
+  type: CardType;
+  label: string;
+};
+
+type RevealedCard = Card & {
+  revealed: boolean;
+  isFlipping?: boolean;
+};
+
+type PlayingPlayer = {
+  id: string;
+  name: string;
+  handCards: Card[];
+  placedCards: RevealedCard[];
+  winCount: number;
+  passed: boolean;
+};
+
+type PlayingState = {
+  phase: "placing" | "bidding" | "revealing" | "result";
+  message: string;
+
+  currentTurnPlayerId: string;
+  turnOrder: string[];
+
+  bid: number;
+  highestBidderId: string | null;
+  revealedRoseCount?: number;
+
+  players: PlayingPlayer[];
+};
+
+export default function App() {
+  const [currentPage, setCurrentPage] =
+    useState<Page>("title");
+
+  const [playerName, setPlayerName] =
+    useState("");
+
+  const [roomId, setRoomId] =
+    useState("");
+
+  const [players, setPlayers] =
+    useState<Player[]>([]);
+
+  const [playingState, setPlayingState] =
+    useState<PlayingState | null>(null);
+
+  // 優勝者の名前を保存する
+  const [winnerName, setWinnerName] =
+    useState("");
+
+  const shouldShowBackground =
+    currentPage !== "playing";
 
   useEffect(() => {
     // プレイヤーリストの更新を受信
-    socket.on("update_players", (updatedPlayers: Player[]) => {
-      setPlayers(updatedPlayers);
-    });
+    socket.on(
+      "update_players",
+      (updatedPlayers: Player[]) => {
+        setPlayers(updatedPlayers);
+      }
+    );
 
     // 誰かが開始ボタンを押した時に全員の画面を切り替える
     socket.on("game_started", () => {
+      setWinnerName("");
+      setPlayingState(null);
       setCurrentPage("playing");
     });
+
+    // プレイ中の状態を受信
+    socket.on(
+      "playing_state",
+      (nextPlayingState: PlayingState) => {
+        setPlayingState(nextPlayingState);
+      }
+    );
+
+    // 優勝者が決まった時に全員の画面をリザルトへ移動する
+    socket.on(
+      "playing_game_won",
+      ({
+        winnerId,
+        winnerName,
+      }: {
+        winnerId: string;
+        winnerName: string;
+      }) => {
+        console.log("game won:", {
+          winnerId,
+          winnerName,
+        });
+
+        setWinnerName(winnerName);
+        setCurrentPage("result");
+      }
+    );
 
     return () => {
       socket.off("update_players");
       socket.off("game_started");
+      socket.off("playing_state");
+      socket.off("playing_game_won");
     };
   }, []);
 
-  const handleJoinRoom = (id: string, name: string) => {
+  const handleJoinRoom = (
+    id: string,
+    name: string
+  ) => {
     setRoomId(id);
     setPlayerName(name);
-    socket.emit("join_room", { roomId: id, playerName: name });
+
+    socket.emit("join_room", {
+      roomId: id,
+      playerName: name,
+    });
+
     setCurrentPage("lobby");
   };
 
   // Ready状態をサーバーに送る
   const handleToggleReady = () => {
-    socket.emit("toggle_ready", { roomId });
+    socket.emit("toggle_ready", {
+      roomId,
+    });
   };
 
-  // ゲーム開始をサーバーに送る（ホスト用）
+  // ゲーム開始をサーバーに送る
   const handleStartGame = () => {
-    socket.emit("start_game", { roomId });
+    socket.emit("start_game", {
+      roomId,
+    });
   };
 
   return (
     <div
-      className={shouldShowBackground ? "app app--with-bg" : "app"}
+      className={
+        shouldShowBackground
+          ? "app app--with-bg"
+          : "app"
+      }
       style={
         shouldShowBackground
-          ? { backgroundImage: `url(${titleBg})` }
+          ? {
+              backgroundImage: `url(${titleBg})`,
+            }
           : undefined
       }
     >
@@ -83,7 +187,9 @@ export default function App() {
           roomId={roomId}
           playerName={playerName}
           players={players}
-          onBackToTitle={() => window.location.reload()}
+          onBackToTitle={() =>
+            window.location.reload()
+          }
           onToggleReady={handleToggleReady}
           onStartGame={handleStartGame}
         />
@@ -91,16 +197,35 @@ export default function App() {
 
       {currentPage === "playing" && (
         <PlayingPage
-          onBackToLobby={() => setCurrentPage("lobby")}
-          onGoToResult={() => setCurrentPage("result")}
+          socket={socket}
+          roomId={roomId}
+          playerName={playerName}
+          players={players}
+          playingState={playingState}
+          onBackToLobby={() =>
+            setCurrentPage("lobby")
+          }
+          onGoToResult={() =>
+            setCurrentPage("result")
+          }
+          onGameWon={(name) => {
+            setWinnerName(name);
+            setCurrentPage("result");
+          }}
         />
       )}
 
       {currentPage === "result" && (
         <ResultPage
-          winnerName={playerName}
-          onRematch={() => setCurrentPage("lobby")}
-          onBackToTitle={() => setCurrentPage("title")}
+          winnerName={
+            winnerName || "不明なプレイヤー"
+          }
+          onRematch={() =>
+            setCurrentPage("lobby")
+          }
+          onBackToTitle={() =>
+            setCurrentPage("title")
+          }
         />
       )}
     </div>
