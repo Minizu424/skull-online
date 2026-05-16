@@ -103,6 +103,27 @@ export default function App() {
           onBackToTitle={() => setCurrentPage("title")}
         />
       )}
+    {/* デバッグ用：リザルト画面へ直行 */}
+      {currentPage !== "result" && (
+        <button
+          onClick={() => setCurrentPage("result")}
+          style={{
+            position: "fixed",
+            right: "20px",
+            top: "20px",
+            zIndex: 9999,
+            padding: "10px 16px",
+            backgroundColor: "#c0392b",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Dev: Result
+        </button>
+      )}
     </div>
   );
 }
