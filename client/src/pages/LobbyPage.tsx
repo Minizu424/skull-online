@@ -65,7 +65,11 @@ export function LobbyPage({
   const allReady =
   (players.length === 3 || players.length === 4) &&
     players.every((player) => player.isReady || player.isHost);
-
+  const handleBackToTitle = () => {
+    setTimeout(() => {
+      onBackToTitle();
+    }, 150);
+  };
   return (
     <div className="lobby-page">
       <div className="lobby-header">
@@ -114,7 +118,7 @@ export function LobbyPage({
         </div>
 
         <div className="button-row">
-          <Button onClick={onBackToTitle}>退室</Button>
+          <Button onClick={handleBackToTitle}>退室</Button>
 
           {/* 全員がReadyを切り替えられる */}
           <Button onClick={onToggleReady}>
