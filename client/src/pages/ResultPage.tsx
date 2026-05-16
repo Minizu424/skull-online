@@ -5,6 +5,7 @@ import { VolumeControl } from "../components/VolumeControl";
 
 import "../styles/ResultPage.css";
 import resultBg from "../assets/back-result.png";
+import timerIcon from "../assets/icon_timer.webp";
 type ResultPageProps = {
   winnerName: string;
 
@@ -68,9 +69,17 @@ export function ResultPage({
             30秒後にタイトルへ戻ります
           </p>
 
-          <p>
-            残り {timeLeft} 秒
-          </p>
+          <div className="result-page__time-left-row">
+            <img
+              src={timerIcon}
+              alt="timer"
+              className="result-page__timer-icon"
+            />
+
+            <p>
+              残り {timeLeft} 秒
+            </p>
+          </div>
         </div>
 
         <div className="result-page__buttons">

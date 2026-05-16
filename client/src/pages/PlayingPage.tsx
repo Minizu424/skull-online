@@ -98,6 +98,21 @@ export function PlayingPage({
   const [timer, setTimer] =
     useState(30);
 
+  useEffect(() => {
+  if (timer <= 0) {
+    setMessage("時間切れ！");
+    return;
+  }
+
+  const interval = setInterval(() => {
+    setTimer((prev) => prev - 1);
+  }, 1000);
+
+  return () =>
+    clearInterval(interval);
+
+}, [timer]);
+
   const [selectedCardId, setSelectedCardId] =
     useState<string | null>(null);
 

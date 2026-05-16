@@ -7,6 +7,8 @@ import { VolumeControl } from "../components/VolumeControl";
 import { Logo } from "../components/Logo";
 import "../styles/TitlePage.css";
 
+import buttonClickSound from "../assets/click_game.wav";
+
 type TitlePageProps = {
   onCreateRoom: (roomId: string, playerName: string) => void;
   onJoinRoom?: (roomId: string, playerName: string) => void;
@@ -21,6 +23,7 @@ export function TitlePage({
   const [showModal, setShowModal] = useState(false);
   const [volume, setVolume] = useState(50);
   const [isMuted, setIsMuted] = useState(false);
+  const [isRuleOpen, setIsRuleOpen] = useState(false);
 
   // 名前復元
   useEffect(() => {
@@ -30,6 +33,17 @@ export function TitlePage({
       setPlayerName(savedName);
     }
   }, []);
+
+  const playButtonSound = () => {
+    if (isMuted) {
+      return;
+    }
+
+    const audio = new Audio(buttonClickSound);
+    audio.volume = volume / 100;
+    audio.currentTime = 0;
+    audio.play();
+  };
 
   const handleNameChange = (value: string) => {
     setPlayerName(value);
@@ -58,6 +72,8 @@ export function TitlePage({
   };
 
   const handleCreateRoom = () => {
+    playButtonSound();
+
     const newRoomId = createTemporaryRoomId();
     const trimmedPlayerName = playerName.trim();
 
@@ -66,16 +82,38 @@ export function TitlePage({
     onCreateRoom(newRoomId, trimmedPlayerName);
   };
 
-  const handleJoinRoom = () => {
-    const trimmedPlayerName = playerName.trim();
+  const handleOpenJoinModal = () => {
+    playButtonSound();
+    setShowModal(true);
+  };
 
+  const handleCloseJoinModal = () => {
+    playButtonSound();
+    setShowModal(false);
+  };
+
+  const handleJoinRoom = () => {
     if (roomId.length !== 6) {
       return;
     }
 
+    playButtonSound();
+
+    const trimmedPlayerName = playerName.trim();
+
     localStorage.setItem("roomId", roomId);
 
     onJoinRoom?.(roomId, trimmedPlayerName);
+  };
+
+  const handleOpenRule = () => {
+    playButtonSound();
+    setIsRuleOpen(true);
+  };
+
+  const handleCloseRule = () => {
+    playButtonSound();
+    setIsRuleOpen(false);
   };
 
   const isNameEmpty = playerName.trim() === "";
@@ -83,7 +121,6 @@ export function TitlePage({
 
   return (
     <div className="title-page">
-
       <main className="title-page__content">
         <Logo />
 
@@ -109,18 +146,21 @@ export function TitlePage({
           </Button>
 
           <Button
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenJoinModal}
             disabled={isNameEmpty}
           >
             部屋を探す
           </Button>
 
-          <Button>
+          <Button
+            className="title-page__menu-button"
+            onClick={handleOpenRule}
+          >
             ルール説明
           </Button>
         </div>
       </main>
-      
+
       <div className="title-page__volume">
         <VolumeControl
           volume={volume}
@@ -130,8 +170,39 @@ export function TitlePage({
         />
       </div>
 
+      {isRuleOpen && (
+        <div className="rule-modal">
+          <div className="rule-modal__content">
+            <h2 className="rule-modal__title">ルール説明</h2>
+
+            <div className="rule-modal__text">
+              <p>自分のターンに、カードを1枚出します。</p>
+              <p>カードには、スカル・ローズ・ダブルローズがあります。</p>
+              <p>ローズは花1枚分、ダブルローズは花2枚分として数えます。</p>
+              <p>場のカードが増えたら、チャレンジを宣言できます。</p>
+              <p>チャレンジでは、めくる花の枚数を決めます。</p>
+              <p>めくる枚数は前プレイヤーの宣言枚数より多くしなければいけない。</p>
+              <p>宣言できないならパスを選択する。</p>
+              <p>チャレンジ成功時には自分の出したカードをめくります。</p>
+              <p>次に他プレイヤーの場のカードを上からめくります。</p>
+              <p>スカルをめくらずに、指定した花の枚数を達成できれば成功です。</p>
+              <p>スカルをめくるとチャレンジ失敗になります。</p>
+              <p>チャレンジ失敗時には手札を一枚捨てます。</p>
+              <p>相手のカードを読みながら二回チャレンジを成功したら勝利です。</p>
+            </div>
+
+            <button
+              className="rule-modal__close-button"
+              onClick={handleCloseRule}
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
+
       {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
+        <Modal onClose={handleCloseJoinModal}>
           <div className="title-page__modal">
             <h2 className="title-page__modal-title">
               ルームID入力
@@ -156,7 +227,7 @@ export function TitlePage({
                 入室
               </Button>
 
-              <Button onClick={() => setShowModal(false)}>
+              <Button onClick={handleCloseJoinModal}>
                 閉じる
               </Button>
             </div>

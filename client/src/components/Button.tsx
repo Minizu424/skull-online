@@ -1,29 +1,33 @@
 import "../styles/Button.css";
-
+import clickSound from "../assets/click_game.wav";
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
-  disabled?: boolean; // 最終的に?は消しましょう
+  disabled?: boolean;
+  className?: string;
 };
 
 export function Button({
   children,
   onClick,
   disabled = false,
+  className = "",
 }: ButtonProps) {
-  // クリックSE
   const playClickSound = () => {
-    const audio = new Audio(
-      "/sounds/click.mp3"
-    );
+    const audio = new Audio(clickSound);
 
     audio.volume = 0.5;
+    audio.currentTime = 0;
 
-    audio.play();
+    audio.play().catch(() => {
+      // ブラウザ側で再生が止められた場合のエラー対策
+    });
   };
 
   const handleClick = () => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     playClickSound();
 
@@ -32,7 +36,7 @@ export function Button({
 
   return (
     <button
-      className="game-button"
+      className={`game-button ${className}`}
       onClick={handleClick}
       disabled={disabled}
     >
