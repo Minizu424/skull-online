@@ -11,224 +11,127 @@ type Player = {
   frameColor: "blue" | "green" | "purple" | "red";
 };
 
-
 type LobbyPageProps = {
-  roomId:string;
+  roomId: string;
   playerName: string;
+  players: Player[];
   onBackToTitle: () => void;
+  onToggleReady: () => void;
   onStartGame: () => void;
 };
 
 export function LobbyPage({
-    roomId,
-    playerName,
-    onBackToTitle,
-    onStartGame,
-  }: LobbyPageProps) {
+  roomId,
+  playerName,
+  players,
+  onBackToTitle,
+  onToggleReady,
+  onStartGame,
+}: LobbyPageProps) {
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(50);
   const [isMuted, setIsMuted] = useState(false);
 
-  const frameColors: Player["frameColor"][] = [
-    "blue",
-    "green",
-    "purple",
-    "red",
-  ];
-
-
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      id: "1",
-      name: playerName,
-      isHost: true,
-      isReady: false,
-      frameColor: frameColors[0],
-      
-    },
-  ]);
-
-  
-  // ダミー入室
-
-  const addDummyPlayer = () => {
-    if (players.length >= 4) return;
-
-    const newPlayer: Player = {
-      id: crypto.randomUUID(),
-      name: `Player${players.length + 1}`,
-      isHost: false,
-      isReady: false,
-      frameColor: frameColors[players.length],
-    };
-
-    setPlayers([...players, newPlayer]);
-  };
-
-  // ダミー退出
-  const removeDummyPlayer = () => {
-    if (players.length <= 1) return;
-
-    setPlayers(players.slice(0, -1));
-  };
-
-  // Ready切り替え
-  const toggleReady = () => {
-    const updatedPlayers = players.map((player, index) => {
-      if (index === 0) {
-        return {
-          ...player,
-          isReady: !player.isReady,
-        };
+  // コピー機能（セキュリティ制限回避版）
+  const copyRoomId = () => {
+    const textToCopy = roomId;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    } else {
+      // 古いブラウザや非HTTPS環境用のフォールバック
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('コピーに失敗しました', err);
       }
-
-      return player;
-    });
-
-    setPlayers(updatedPlayers);
+      document.body.removeChild(textArea);
+    }
   };
 
-  const setAllReady = () => {
-    const updatedPlayers = players.map((player) => {
-      return {
-        ...player,
-        isReady: true,
-      };
-    });
+  // 自分のプレイヤー情報を取得
+  const me = players.find((p) => p.name === playerName);
+  const isMeHost = me?.isHost;
 
-    setPlayers(updatedPlayers);
-  };
-
-  const setAllNotReady = () => {
-    const updatedPlayers = players.map((player) => {
-      return {
-        ...player,
-        isReady: false,
-      };
-    });
-
-    setPlayers(updatedPlayers);
-  };
-
-  const copyRoomId = async () => {
-    await navigator.clipboard.writeText(roomId);
-
-    setCopied(true);
-
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
-
-  // 全員Ready判定
+  // ゲーム開始条件：2人以上いて、全員（ホスト含む）がReady状態
   const allReady =
-    players.length >= 3 &&
-    players.every((player) => player.isReady);
+  (players.length === 3 || players.length === 4) &&
+    players.every((player) => player.isReady || player.isHost);
 
   return (
     <div className="lobby-page">
-      {/* 上部 */}
       <div className="lobby-header">
         <div className="room-id-area">
           <h2>Room ID : {roomId}</h2>
-
-          <Button onClick={copyRoomId}>
-            Copy
-          </Button>
-
-          {copied && (
-            <span className="copied-text">
-              Copied!
-            </span>
-          )}
+          <Button onClick={copyRoomId}>Copy</Button>
+          {copied && <span className="copied-text">Copied!</span>}
         </div>
-
         <h2>{players.length} / 4 Players</h2>
       </div>
 
       <main className="lobby-main">
-        {/* プレイヤーカード */}
         <div className="player-list">
-        {[0, 1, 2, 3].map((slot) => {
-          const player = players[slot];
+          {[0, 1, 2, 3].map((slot) => {
+            const player = players[slot];
+            const isMe = player && player.name === playerName;
 
-          return (
-            <div
-              key={player ? player.id : `empty-${slot}`}
-              className={
-                player
-                  ? `player-card player-card--filled player-card--${player.frameColor} ${
-                      player.isReady ? "ready" : ""
-                    }`
-                  : "player-card player-card--empty"
-              }
-            >
-              {player ? (
-                <div className="player-card__inner">
-                  <h3>
-                    {player.isHost && "👑 "}
-                    {player.name}
-                  </h3>
-
-                  <p>
-                    {player.isReady ? "READY" : "Not Ready"}
-                  </p>
-                </div>
-              ) : (
-                <div className="player-card__empty-inner">
-                  <h3>Waiting...</h3>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-        {/* メインボタン */}
-        <div className="button-row">
-          <Button onClick={onBackToTitle}>
-            退室
-          </Button>
-
-          <Button onClick={setAllReady}>
-            全員Ready
-          </Button>
-
-          <Button onClick={setAllNotReady}>
-            全員NotReady
-          </Button>
-
-          <Button onClick={toggleReady}>
-            Ready切り替え
-          </Button>
-
-          <Button
-            onClick={onStartGame}
-            disabled={!allReady}
-          >
-            ゲーム開始
-          </Button>
+            return (
+              <div
+                key={player ? player.id : `empty-${slot}`}
+                className={
+                  player
+                    ? `player-card player-card--filled player-card--${player.frameColor} ${
+                        player.isReady ? "ready" : ""
+                      }`
+                    : "player-card player-card--empty"
+                }
+              >
+                {player ? (
+                  <div className="player-card__inner">
+                    <h3>
+                      {player.isHost && "👑 "}
+                      {player.name}
+                      {isMe && <span style={{ fontSize: "0.5em", opacity: 0.6 }}> (あなた)</span>}
+                    </h3>
+                    <p>{player.isReady ? "READY" : "Not Ready"}</p>
+                  </div>
+                ) : (
+                  <div className="player-card__empty-inner">
+                    <h3>Waiting...</h3>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* 開発用 */}
         <div className="button-row">
-          <Button onClick={addDummyPlayer}>
-            ダミー入室
+          <Button onClick={onBackToTitle}>退室</Button>
+
+          {/* 全員がReadyを切り替えられる */}
+          <Button onClick={onToggleReady}>
+            {me?.isReady ? "Ready解除" : "Ready!"}
           </Button>
 
-          <Button onClick={removeDummyPlayer}>
-            ダミー退出
-          </Button>
+          {/* ホストだけに「ゲーム開始」ボタンを表示 */}
+          {isMeHost && (
+            <Button onClick={onStartGame} disabled={!allReady}>
+              ゲーム開始
+            </Button>
+          )}
         </div>
       </main>
 
       <div className="volume-control-area">
-        <VolumeControl
-          volume={volume}
-          setVolume={setVolume}
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-        />
+        <VolumeControl volume={volume} setVolume={setVolume} isMuted={isMuted} setIsMuted={setIsMuted} />
       </div>
     </div>
   );
