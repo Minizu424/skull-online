@@ -87,3 +87,22 @@
   bottom: 24px;
   z-index: 2;
 }
+
+.result-page__timer-area p {
+  margin: 0;
+}
+
+.result-page__time-left-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.result-page__timer-icon {
+  width: 36px;
+  height: 36px;
+
+  object-fit: contain;
+}
