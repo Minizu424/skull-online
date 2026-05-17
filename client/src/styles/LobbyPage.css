@@ -347,3 +347,203 @@
 
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
+
+/* =========================
+   プレイヤー参加アニメーション：スカルホラー版
+========================= */
+.player-card--joined {
+  animation: playerJoinSkull 1.05s ease-out both;
+}
+
+.player-card--joined .player-card__inner {
+  animation: playerInnerSkullGlow 1.05s ease-out both;
+}
+
+.player-card--joined::before {
+  content: "";
+
+  position: absolute;
+  inset: 16px;
+
+  border-radius: 14px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(180, 0, 30, 0.42) 28%,
+      rgba(20, 0, 0, 0.12) 56%,
+      rgba(0, 0, 0, 0) 74%
+    );
+
+  z-index: 2;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  animation: skullAura 1.05s ease-out both;
+}
+
+.player-card--joined::after {
+  animation: skullFrameFlicker 1.05s ease-out both;
+}
+
+@keyframes playerJoinSkull {
+  0% {
+    opacity: 0;
+    transform: translateY(42px) scale(0.76) rotate(-2deg);
+    filter:
+      brightness(0.28)
+      contrast(1.25)
+      blur(3px)
+      drop-shadow(0 0 0 rgba(180, 0, 30, 0))
+      drop-shadow(0 12px 20px rgba(0, 0, 0, 0.7));
+  }
+
+  28% {
+    opacity: 0.55;
+    transform: translateY(18px) scale(0.92) rotate(2deg);
+    filter:
+      brightness(0.48)
+      contrast(1.35)
+      blur(1.5px)
+      drop-shadow(0 0 10px rgba(180, 0, 30, 0.35))
+      drop-shadow(0 12px 20px rgba(0, 0, 0, 0.75));
+  }
+
+  52% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.04) rotate(-1deg);
+    filter:
+      brightness(1.18)
+      contrast(1.22)
+      blur(0)
+      drop-shadow(0 0 22px rgba(210, 0, 40, 0.48))
+      drop-shadow(0 16px 24px rgba(0, 0, 0, 0.78));
+  }
+
+  64% {
+    transform: translateY(2px) scale(1.01) rotate(1deg);
+    filter:
+      brightness(0.72)
+      contrast(1.35)
+      blur(0)
+      drop-shadow(0 0 10px rgba(120, 0, 20, 0.4))
+      drop-shadow(0 14px 22px rgba(0, 0, 0, 0.7));
+  }
+
+  78% {
+    transform: translateY(-3px) scale(1.015) rotate(-0.5deg);
+    filter:
+      brightness(1.05)
+      contrast(1.2)
+      blur(0)
+      drop-shadow(0 0 16px rgba(190, 0, 35, 0.35))
+      drop-shadow(0 12px 18px rgba(0, 0, 0, 0.62));
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter:
+      brightness(1)
+      contrast(1)
+      blur(0)
+      drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+  }
+}
+
+@keyframes playerInnerSkullGlow {
+  0% {
+    background-color: #0c080a;
+    box-shadow:
+      inset 0 0 32px rgba(0, 0, 0, 0.95),
+      0 0 0 rgba(180, 0, 30, 0),
+      0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  48% {
+    background-color: #1a080d;
+    box-shadow:
+      inset 0 0 22px rgba(0, 0, 0, 0.85),
+      0 0 18px rgba(180, 0, 30, 0.42),
+      0 0 34px rgba(255, 255, 255, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.45);
+  }
+
+  68% {
+    background-color: #10080b;
+    box-shadow:
+      inset 0 0 30px rgba(0, 0, 0, 0.95),
+      0 0 8px rgba(120, 0, 20, 0.35),
+      0 4px 12px rgba(0, 0, 0, 0.45);
+  }
+
+  100% {
+    background-color: #1f1518;
+    box-shadow:
+      inset 0 0 18px rgba(0, 0, 0, 0.75),
+      0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@keyframes skullAura {
+  0% {
+    opacity: 0;
+    transform: scale(0.42);
+  }
+
+  35% {
+    opacity: 0.65;
+    transform: scale(0.95);
+  }
+
+  55% {
+    opacity: 0.22;
+    transform: scale(1.12);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes skullFrameFlicker {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+    filter: brightness(0.35) contrast(1.35);
+  }
+
+  30% {
+    opacity: 0.55;
+    transform: scale(0.98);
+    filter: brightness(0.75) contrast(1.3);
+  }
+
+  48% {
+    opacity: 1;
+    transform: scale(1.035);
+    filter: brightness(1.25) contrast(1.2);
+  }
+
+  58% {
+    opacity: 0.75;
+    transform: scale(1.005);
+    filter: brightness(0.6) contrast(1.5);
+  }
+
+  72% {
+    opacity: 1;
+    transform: scale(1.018);
+    filter: brightness(1.08) contrast(1.18);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) contrast(1);
+  }
+}
