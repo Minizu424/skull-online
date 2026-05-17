@@ -62,8 +62,8 @@
 }
 
 .title-page__modal {
-  width: 520px;
-  min-height: 420px;
+  width: 760px;
+  height: 680px;
 
   background-image: url("../assets/popup_bg.webp");
   background-size: 100% 100%;
@@ -75,34 +75,40 @@
   align-items: center;
   justify-content: center;
 
-  gap: 16px;
+  gap: 14px;
 
-  padding: 90px 70px 45px;
+  padding: 130px 170px 95px;
   box-sizing: border-box;
 
   color: #ffffff;
   text-align: center;
+
+  box-shadow: none;
 }
 
 .title-page__modal-title {
-  margin: 0 0 8px;
+  margin: 0 0 22px;
 
-  font-size: 28px;
+  font-size: 34px;
   font-weight: bold;
 
   color: #ffffff;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.85);
 }
 
 .title-page__room-id-count {
-  margin: -8px 0 0;
+  margin: -6px 0 0;
 
-  font-size: 14px;
+  width: 100%;
+  text-align: right;
+
+  font-size: 16px;
   font-weight: bold;
 
   color: #ffffff;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
 }
+
 .title-page__modal-buttons {
   width: 100%;
 
@@ -110,7 +116,8 @@
   flex-direction: column;
   align-items: center;
 
-  gap: 10px;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .title-page__main-logo {
@@ -212,4 +219,21 @@
 .rule-modal__close-button:hover {
   transform: translateY(2px);
   box-shadow: 0 2px 0 #3e0909;
+}
+
+.join-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
 }
