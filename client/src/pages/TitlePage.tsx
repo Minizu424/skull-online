@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "../components/Button";
-import { Modal } from "../components/Modal";
 import { TextInput } from "../components/TextInput";
 import { VolumeControl } from "../components/VolumeControl";
 import { Logo } from "../components/Logo";
 import "../styles/TitlePage.css";
 
 import buttonClickSound from "../assets/click_game.wav";
+import { useSound } from "../components/SoundProvider";
 
 type TitlePageProps = {
   onCreateRoom: (roomId: string, playerName: string) => void;
@@ -21,9 +21,14 @@ export function TitlePage({
   const [playerName, setPlayerName] = useState("");
   const [roomId, setRoomId] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [volume, setVolume] = useState(50);
-  const [isMuted, setIsMuted] = useState(false);
   const [isRuleOpen, setIsRuleOpen] = useState(false);
+
+  const {
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+  } = useSound();
 
   // 名前復元
   useEffect(() => {
@@ -35,14 +40,17 @@ export function TitlePage({
   }, []);
 
   const playButtonSound = () => {
-    if (isMuted) {
+    if (isMuted || volume === 0) {
       return;
     }
 
     const audio = new Audio(buttonClickSound);
     audio.volume = volume / 100;
     audio.currentTime = 0;
-    audio.play();
+
+    audio.play().catch(() => {
+      // 再生できなかった場合は何もしない
+    });
   };
 
   const handleNameChange = (value: string) => {
@@ -202,7 +210,7 @@ export function TitlePage({
       )}
 
       {showModal && (
-        <Modal onClose={handleCloseJoinModal}>
+        <div className="join-modal">
           <div className="title-page__modal">
             <h2 className="title-page__modal-title">
               ルームID入力
@@ -232,7 +240,7 @@ export function TitlePage({
               </Button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );

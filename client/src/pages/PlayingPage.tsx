@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import { ActionButtons } from "../components/ActionButtons";
 import { HandArea } from "../components/HandArea";
 import { PlayerArea } from "../components/PlayerArea";
+import { VolumeControl } from "../components/VolumeControl";
 import "../styles/PlayingPage.css";
 
 type OnlinePlayer = {
@@ -97,6 +98,12 @@ export function PlayingPage({
 
   const [timer, setTimer] =
     useState(30);
+
+  const [volume, setVolume] =
+    useState(50);
+
+  const [isMuted, setIsMuted] =
+    useState(false);
 
   useEffect(() => {
   if (timer <= 0) {
@@ -722,6 +729,15 @@ export function PlayingPage({
             </div>
           </div>
         )}
+        
+        <div className="playing-volume-control">
+          <VolumeControl
+            volume={volume}
+            setVolume={setVolume}
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
+          />
+        </div>
       </main>
     </div>
   );

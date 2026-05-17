@@ -1,3 +1,9 @@
+import "../styles/VolumeControl.css";
+
+import iconMuted from "../assets/icon_muted.webp";
+import iconVolumeOn from "../assets/icon_volume_on.webp";
+import iconVolumeZero from "../assets/icon_volume_zero.webp";
+
 type VolumeControlProps = {
   volume: number;
   setVolume: (value: number) => void;
@@ -12,40 +18,53 @@ export function VolumeControl({
   isMuted,
   setIsMuted,
 }: VolumeControlProps) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
+  const displayedVolume = isMuted ? 0 : volume;
 
-        gap: "10px",
-      }}
-    >
+  const volumeIcon = isMuted
+    ? iconMuted
+    : displayedVolume === 0
+      ? iconVolumeZero
+      : iconVolumeOn;
+
+  const volumeIconAlt = isMuted
+    ? "ミュート"
+    : displayedVolume === 0
+      ? "音量0"
+      : "音量あり";
+
+  return (
+    <div className="volume-control">
       <button
-        onClick={() =>
-          setIsMuted(!isMuted)
-        }
-        style={{
-          cursor: "pointer",
-        }}
+        className="volume-control__mute-button"
+        onClick={() => setIsMuted(!isMuted)}
+        type="button"
       >
-        {isMuted ? "🔇" : "🔊"}
+        <img
+          src={volumeIcon}
+          alt={volumeIconAlt}
+          className="volume-control__icon"
+        />
       </button>
 
       <input
+        className="volume-control__slider"
         type="range"
         min={0}
         max={100}
-        value={isMuted ? 0 : volume}
-        onChange={(e) =>
-          setVolume(
-            Number(e.target.value)
-          )
-        }
+        value={displayedVolume}
+        onChange={(e) => {
+          const nextVolume = Number(e.target.value);
+
+          setVolume(nextVolume);
+
+          if (nextVolume > 0 && isMuted) {
+            setIsMuted(false);
+          }
+        }}
       />
 
-      <span>
-        {isMuted ? 0 : volume}%
+      <span className="volume-control__value">
+        {displayedVolume}%
       </span>
     </div>
   );
