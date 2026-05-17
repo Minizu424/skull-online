@@ -10,15 +10,17 @@
 
   display: grid;
   grid-template-rows: 1fr;
-  gap: 12px;
 
-  padding: 12px;
+  padding: 0;
 }
 
 .playing-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  position: relative;
+  z-index: 20;
 }
 
 .playing-header h1 {
@@ -29,24 +31,79 @@
 .playing-board {
   position: relative;
 
-  border: 2px solid #555;
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+
+  border: none;
+  border-radius: 0;
 
   background-color: #202020;
 
-  padding-bottom: 150px;
+  overflow: hidden;
 }
+
+.playing-background-image {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  z-index: 0;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* =========================
+   プレイヤー表示
+========================= */
 
 .player-area {
   position: absolute;
 
-  width: 190px;
-  height: 110px;
+  width: 250px;
+  height: 118px;
 
-  border: 2px solid #666;
-  border-radius: 14px;
+  border: none;
+  border-radius: 0;
 
-  background-color: #1a1a1a;
+  background-color: transparent;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10;
+}
+
+.player-frame-image {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: fill;
+
+  pointer-events: none;
+  user-select: none;
+
+  z-index: 1;
+}
+
+.player-area-content {
+  position: relative;
+
+  z-index: 2;
+
+  width: 78%;
+  height: 70%;
 
   display: flex;
   flex-direction: column;
@@ -54,20 +111,40 @@
   align-items: center;
 
   gap: 4px;
+
+  color: white;
+
+  text-align: center;
 }
 
 .player-area h2 {
   margin: 0;
+
   font-size: 16px;
+  font-weight: bold;
+
+  color: white;
+
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 8px rgba(0, 0, 0, 0.8);
 }
 
 .player-area p {
   margin: 0;
+
   font-size: 14px;
+  font-weight: bold;
+
+  color: white;
+
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 8px rgba(0, 0, 0, 0.8);
 }
 
 .top-player {
-  top: 20px;
+  top: 0;
   left: 50%;
 
   transform: translateX(-50%);
@@ -87,28 +164,78 @@
   transform: translateY(-50%);
 }
 
+/* 相手がターン中のときだけ光る */
+.current-turn-player {
+  filter:
+    drop-shadow(0 0 8px rgba(255, 214, 107, 0.95))
+    drop-shadow(0 0 18px rgba(255, 214, 107, 0.65));
+
+  animation: current-turn-frame-glow 1.4s ease-in-out infinite;
+}
+
+@keyframes current-turn-frame-glow {
+  0% {
+    filter:
+      drop-shadow(0 0 6px rgba(255, 214, 107, 0.55))
+      drop-shadow(0 0 14px rgba(255, 214, 107, 0.35));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 0 12px rgba(255, 214, 107, 1))
+      drop-shadow(0 0 28px rgba(255, 214, 107, 0.8));
+  }
+
+  100% {
+    filter:
+      drop-shadow(0 0 6px rgba(255, 214, 107, 0.55))
+      drop-shadow(0 0 14px rgba(255, 214, 107, 0.35));
+  }
+}
+
+/* =========================
+   場・プレイマット
+========================= */
+
 .my-field {
   position: absolute;
 
   left: 50%;
-  top: 45%;
+  top: 47%;
 
   transform: translate(-50%, -50%);
 
-  width: 1000px;
-  height: 400px;
+  width: min(53vw, 1080px);
+  aspect-ratio: 4 / 3;
 
-  border: 2px dashed #888;
-  border-radius: 18px;
+  border: none;
+  border-radius: 0;
 
-  background-color: #181818;
+  background-color: transparent;
 
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 
-  gap: 16px;
+  overflow: visible;
+
+  z-index: 1;
+}
+
+.playing-mat-image {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  z-index: 0;
+
+  pointer-events: none;
+  user-select: none;
 }
 
 .my-field h2,
@@ -116,11 +243,104 @@
   margin: 0;
 }
 
+/* =========================
+   場の中央情報
+========================= */
+
+.field-info {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 12px;
+
+  z-index: 4;
+}
+
+.field-info p {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  color: white;
+
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================
+   テーブル上のカードエリア
+========================= */
+
+.table-card-area {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 2;
+}
+
+.bot-card-stack,
+.my-card-stack {
+  position: absolute;
+
+  display: flex;
+  gap: 10px;
+
+  z-index: 3;
+}
+
+/* 上プレイヤーの場カード */
+.bot-card-stack--top {
+  left: 50%;
+  top: 72px;
+
+  transform: translateX(-50%);
+}
+
+/* 左プレイヤーの場カード */
+.bot-card-stack--left {
+  left: 90px;
+  top: 50%;
+
+  transform: translateY(-50%);
+}
+
+/* 右プレイヤーの場カード */
+.bot-card-stack--right {
+  right: 90px;
+  top: 50%;
+
+  transform: translateY(-50%);
+}
+
+/* 自分の場カード */
+.my-card-stack {
+  left: 50%;
+  bottom: 72px;
+
+  transform: translateX(-50%);
+}
+
+/* =========================
+   手札
+========================= */
+
 .hand-area {
   position: absolute;
 
   left: 50%;
-  bottom: 36px;
+  bottom: 24px;
 
   transform: translateX(-50%);
 
@@ -128,17 +348,22 @@
   justify-content: center;
   align-items: center;
 
-  gap: 24px;
+  gap: 22px;
+
+  z-index: 8;
 }
 
 .card-button {
-  width: 120px;
-  height: 170px;
+  width: 110px;
+  height: 155px;
+
+  padding: 0;
+  overflow: hidden;
 
   border: 3px solid white;
-  border-radius: 16px;
+  border-radius: 14px;
 
-  background-color: #333;
+  background-color: transparent;
   color: white;
 
   font-size: 22px;
@@ -146,7 +371,10 @@
 
   cursor: pointer;
 
-  transition: 0.15s;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .card-button:hover {
@@ -159,19 +387,31 @@
   box-shadow: 0 0 16px white;
 }
 
+.card-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =========================
+   場に出したカード
+========================= */
+
 .placed-card-stack {
   display: flex;
   gap: 12px;
 }
 
 .placed-card {
-  width: 76px;
-  height: 106px;
+  width: 86px;
+  height: 120px;
+
+  padding: 0;
+  overflow: hidden;
 
   border: 1px solid white;
   border-radius: 8px;
 
-  background-color: #555;
+  background-color: transparent;
   color: white;
 
   display: flex;
@@ -181,7 +421,10 @@
   font-size: 20px;
 
   transform-style: preserve-3d;
-  transition: transform 1.5s ease;
+
+  transition:
+    transform 1.5s ease,
+    box-shadow 0.15s ease;
 }
 
 .placed-card.flipping {
@@ -191,7 +434,7 @@
 }
 
 .placed-card.revealed {
-  background-color: #333;
+  background-color: transparent;
   transform: rotateY(180deg);
 }
 
@@ -200,6 +443,95 @@
 
   animation: reveal-pulse 1.2s infinite;
 }
+
+.card-content {
+  display: inline-block;
+}
+
+.placed-card.revealed .card-content {
+  transform: rotateY(180deg);
+}
+
+.card-image,
+.placed-card-image,
+.flip-card-image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  border-radius: inherit;
+
+  pointer-events: none;
+}
+
+/* =========================
+   宣言数選択
+========================= */
+
+.bid-controls {
+  position: absolute;
+
+  left: 50%;
+  top: 38%;
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  z-index: 12;
+}
+
+/* =========================
+   アクションボタン
+========================= */
+
+.action-area {
+  position: absolute;
+
+  left: 50px;
+  bottom: 10px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  z-index: 20;
+}
+
+/* =========================
+   音量UI
+========================= */
+
+.playing-volume-control {
+  position: fixed;
+
+  right: 24px;
+  bottom: 24px;
+
+  z-index: 50;
+
+  background-color: rgba(0, 0, 0, 0.65);
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+
+  display: flex;
+  align-items: center;
+}
+
+/* =========================
+   通常カードめくりアニメーション
+========================= */
 
 @keyframes reveal-pulse {
   0% {
@@ -213,53 +545,6 @@
   100% {
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
   }
-}
-
-.card-content {
-  display: inline-block;
-}
-
-.placed-card.revealed .card-content {
-  transform: rotateY(180deg);
-}
-
-.bid-controls {
-  position: absolute;
-
-  left: 50%;
-  top: 40%;
-
-  transform:
-    translate(-50%, -50%)
-    translateY(-10px);
-
-  display: flex;
-  align-items: center;
-
-  gap: 12px;
-
-  z-index: 10;
-}
-
-.action-area {
-  position: absolute;
-
-  left: 6px;
-  bottom: 10px;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 12px;
-}
-
-.dev-buttons {
-  position: absolute;
-
-  right: 20px;
-  top: 20px;
-
-  z-index: 9999;
 }
 
 @keyframes card-flip {
@@ -289,10 +574,13 @@
   }
 }
 
-/* ===== 大きくめくる演出 ===== */
+/* =========================
+   大きくめくる演出
+========================= */
 
 .flip-overlay {
   position: absolute;
+
   left: 50%;
   top: 50%;
 
@@ -356,20 +644,23 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
+  overflow: hidden;
+  padding: 0;
+
   box-shadow:
     0 0 20px white,
     0 0 40px rgba(255, 255, 255, 0.7);
 }
 
 .flip-card-front {
-  background: #444;
+  background: transparent;
   transform: rotateY(0deg);
 
   animation: front-hide 4.8s ease forwards;
 }
 
 .flip-card-back {
-  background: #222;
+  background: transparent;
   transform: rotateY(180deg);
 
   animation: back-show 4.8s ease forwards;
@@ -383,7 +674,6 @@
       rotateY(0deg);
   }
 
-  /* 浮き上がって大きくなる */
   30% {
     transform:
       scale(1.15)
@@ -391,7 +681,6 @@
       rotateY(0deg);
   }
 
-  /* 横向きになる */
   50% {
     transform:
       scale(1.15)
@@ -399,7 +688,6 @@
       rotateY(90deg);
   }
 
-  /* 表になる */
   70% {
     transform:
       scale(1.15)
@@ -407,7 +695,6 @@
       rotateY(180deg);
   }
 
-  /* 表を見せ続ける */
   100% {
     transform:
       scale(1.15)
@@ -452,7 +739,7 @@
   }
 }
 
-/* 使っていないなら残してもOK */
+/* 使っていないなら残してOK */
 @keyframes flip-zoom {
   0% {
     transform: scale(0.7);
@@ -468,6 +755,10 @@
     transform: scale(1.15);
   }
 }
+
+/* =========================
+   旧bot-field 残し
+========================= */
 
 .bot-field {
   position: absolute;
@@ -485,6 +776,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   gap: 8px;
 }
 
@@ -502,128 +794,20 @@
 .bot-field--top {
   top: 140px;
   left: 50%;
+
   transform: translateX(-50%);
 }
 
 .bot-field--left {
   left: 40px;
   top: 60%;
+
   transform: translateY(-50%);
 }
 
 .bot-field--right {
   right: 40px;
   top: 60%;
-  transform: translateY(-50%);
-}
-
-.playing-message {
-  position: absolute;
-
-  top: 56px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  padding: 8px 18px;
-
-  border-radius: 999px;
-
-  background-color: rgba(0, 0, 0, 0.65);
-  color: white;
-
-  font-size: 16px;
-  font-weight: bold;
-
-  z-index: 20;
-}
-
-.table-card-area {
-  position: relative;
-
-  width: 100%;
-  height: 100%;
-
-  flex: 1;
-}
-
-.bot-card-stack,
-.my-card-stack {
-  position: absolute;
-
-  display: flex;
-  gap: 10px;
-}
-
-/* 上プレイヤー */
-.bot-card-stack--top {
-  left: 50%;
-  top: 20px;
-
-  transform: translateX(-50%);
-}
-
-/* 左プレイヤー */
-.bot-card-stack--left {
-  left: 60px;
-  top: 50%;
 
   transform: translateY(-50%);
-}
-
-/* 右プレイヤー */
-.bot-card-stack--right {
-  right: 60px;
-  top: 50%;
-
-  transform: translateY(-50%);
-}
-
-/* 自分 */
-.my-card-stack {
-  left: 50%;
-  bottom: 20px;
-
-  transform: translateX(-50%);
-}
-
-.field-info {
-  position: absolute;
-
-  left: 50%;
-  top: 75%;
-
-  transform:
-    translate(-50%, -50%)
-    translateY(-85px);
-
-  display: flex;
-  flex-direction: column;
-
-  align-items: center;
-
-  gap: 12px;
-
-  z-index: 5;
-}
-
-.field-info p {
-  margin: 0;
-  font-size: 20px;
-}
-
-.playing-volume-control {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 50;
-
-  padding: 8px 12px;
-  border-radius: 12px;
-
-  background: rgba(0, 0, 0, 0.45);
-  color: white;
-
-  display: flex;
-  align-items: center;
 }
