@@ -611,3 +611,19 @@
   margin: 0;
   font-size: 20px;
 }
+
+.playing-volume-control {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 50;
+
+  padding: 8px 12px;
+  border-radius: 12px;
+
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+
+  display: flex;
+  align-items: center;
+}
