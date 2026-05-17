@@ -8,7 +8,7 @@ import { Logo } from "../components/Logo";
 import "../styles/TitlePage.css";
 
 import buttonClickSound from "../assets/click_game.wav";
-
+import { useSound } from "../components/SoundProvider";
 type TitlePageProps = {
   onCreateRoom: (roomId: string, playerName: string) => void;
   onJoinRoom?: (roomId: string, playerName: string) => void;
@@ -21,8 +21,12 @@ export function TitlePage({
   const [playerName, setPlayerName] = useState("");
   const [roomId, setRoomId] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [volume, setVolume] = useState(50);
-  const [isMuted, setIsMuted] = useState(false);
+  const {
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+  } = useSound();
   const [isRuleOpen, setIsRuleOpen] = useState(false);
 
   // 名前復元

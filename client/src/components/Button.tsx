@@ -1,5 +1,6 @@
 import "../styles/Button.css";
-import clickSound from "../assets/click_game.wav";
+import { useSound } from "../components/SoundProvider";
+
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
@@ -13,16 +14,7 @@ export function Button({
   disabled = false,
   className = "",
 }: ButtonProps) {
-  const playClickSound = () => {
-    const audio = new Audio(clickSound);
-
-    audio.volume = 0.5;
-    audio.currentTime = 0;
-
-    audio.play().catch(() => {
-      // ブラウザ側で再生が止められた場合のエラー対策
-    });
-  };
+  const { playClickSound } = useSound();
 
   const handleClick = () => {
     if (disabled) {
@@ -30,7 +22,6 @@ export function Button({
     }
 
     playClickSound();
-
     onClick?.();
   };
 

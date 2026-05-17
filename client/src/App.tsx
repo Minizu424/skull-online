@@ -6,6 +6,7 @@ import { PlayingPage } from "./pages/PlayingPage";
 import { ResultPage } from "./pages/ResultPage";
 import titleBg from "./assets/back-title.png";
 import "./App.css";
+import { SoundProvider } from "./components/SoundProvider";
 
 type Page = "title" | "lobby" | "playing" | "result";
 
@@ -161,73 +162,75 @@ export default function App() {
   };
 
   return (
-    <div
-      className={
-        shouldShowBackground
-          ? "app app--with-bg"
-          : "app"
-      }
-      style={
-        shouldShowBackground
-          ? {
-              backgroundImage: `url(${titleBg})`,
+    <SoundProvider>
+      <div
+        className={
+          shouldShowBackground
+            ? "app app--with-bg"
+            : "app"
+        }
+        style={
+          shouldShowBackground
+            ? {
+                backgroundImage: `url(${titleBg})`,
+              }
+            : undefined
+        }
+      >
+        {currentPage === "title" && (
+          <TitlePage
+            onCreateRoom={handleJoinRoom}
+            onJoinRoom={handleJoinRoom}
+          />
+        )}
+
+        {currentPage === "lobby" && (
+          <LobbyPage
+            roomId={roomId}
+            playerName={playerName}
+            players={players}
+            onBackToTitle={() =>
+              window.location.reload()
             }
-          : undefined
-      }
-    >
-      {currentPage === "title" && (
-        <TitlePage
-          onCreateRoom={handleJoinRoom}
-          onJoinRoom={handleJoinRoom}
-        />
-      )}
+            onToggleReady={handleToggleReady}
+            onStartGame={handleStartGame}
+          />
+        )}
 
-      {currentPage === "lobby" && (
-        <LobbyPage
-          roomId={roomId}
-          playerName={playerName}
-          players={players}
-          onBackToTitle={() =>
-            window.location.reload()
-          }
-          onToggleReady={handleToggleReady}
-          onStartGame={handleStartGame}
-        />
-      )}
+        {currentPage === "playing" && (
+          <PlayingPage
+            socket={socket}
+            roomId={roomId}
+            playerName={playerName}
+            players={players}
+            playingState={playingState}
+            onBackToLobby={() =>
+              setCurrentPage("lobby")
+            }
+            onGoToResult={() =>
+              setCurrentPage("result")
+            }
+            onGameWon={(name) => {
+              setWinnerName(name);
+              setCurrentPage("result");
+            }}
+          />
+        )}
 
-      {currentPage === "playing" && (
-        <PlayingPage
-          socket={socket}
-          roomId={roomId}
-          playerName={playerName}
-          players={players}
-          playingState={playingState}
-          onBackToLobby={() =>
-            setCurrentPage("lobby")
-          }
-          onGoToResult={() =>
-            setCurrentPage("result")
-          }
-          onGameWon={(name) => {
-            setWinnerName(name);
-            setCurrentPage("result");
-          }}
-        />
-      )}
-
-      {currentPage === "result" && (
-        <ResultPage
-          winnerName={
-            winnerName || "不明なプレイヤー"
-          }
-          onRematch={() =>
-            setCurrentPage("lobby")
-          }
-          onBackToTitle={() =>
-            setCurrentPage("title")
-          }
-        />
-      )}
-    </div>
+        {currentPage === "result" && (
+          <ResultPage
+            winnerName={
+              winnerName || "不明なプレイヤー"
+            }
+            onRematch={() =>
+              setCurrentPage("lobby")
+            }
+            onBackToTitle={() =>
+              setCurrentPage("title")
+            }
+          />
+        )}
+      </div>
+    </SoundProvider>
   );
 }
