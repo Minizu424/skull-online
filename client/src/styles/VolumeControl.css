@@ -1,0 +1,45 @@
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.volume-control__mute-button {
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.volume-control__icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.volume-control__slider {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.volume-control__value {
+  display: inline-block;
+  width: 48px;
+
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+
+  flex-shrink: 0;
+}
