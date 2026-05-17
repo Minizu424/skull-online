@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "../components/Button";
 import "../styles/LobbyPage.css";
 import { VolumeControl } from "../components/VolumeControl";
-
+import { useSound } from "../components/SoundProvider";
 type Player = {
   id: string;
   name: string;
@@ -29,9 +29,12 @@ export function LobbyPage({
   onStartGame,
 }: LobbyPageProps) {
   const [copied, setCopied] = useState(false);
-  const [volume, setVolume] = useState(50);
-  const [isMuted, setIsMuted] = useState(false);
-
+  const {
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+  } = useSound();
   // コピー機能（セキュリティ制限回避版）
   const copyRoomId = () => {
     const textToCopy = roomId;
