@@ -118,7 +118,10 @@ type PlayingPageProps = {
   playingState: PlayingState | null;
   onBackToLobby: () => void;
   onGoToResult: () => void;
-  onGameWon: (winnerName: string) => void;
+  onGameWon: (
+    winnerName: string,
+    winnerColor: CardColor
+  ) => void;
 };
 
 const onlinePlayerPositions: Array<"top" | "left" | "right"> = [
@@ -435,8 +438,16 @@ export function PlayingPage({
         `${fixedWinnerName} が優勝しました！`
       );
 
+      const fixedWinnerColor =
+        players.find(
+          (player) => player.id === winnerId
+        )?.frameColor ?? "blue";
+      
       setTimeout(() => {
-        onGameWon(fixedWinnerName);
+        onGameWon(
+          fixedWinnerName,
+          fixedWinnerColor
+        );
       }, 1000);
     };
 
