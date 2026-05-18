@@ -8,14 +8,24 @@ import titleBg from "./assets/back-title.png";
 import "./App.css";
 import { SoundProvider } from "./components/SoundProvider";
 
-type Page = "title" | "lobby" | "playing" | "result";
+type Page =
+  | "title"
+  | "lobby"
+  | "playing"
+  | "result";
+
+type PlayerColor =
+  | "blue"
+  | "green"
+  | "purple"
+  | "red";
 
 type Player = {
   id: string;
   name: string;
   isHost: boolean;
   isReady: boolean;
-  frameColor: "blue" | "green" | "purple" | "red";
+  frameColor: PlayerColor;
 };
 
 type CardType =
@@ -44,7 +54,11 @@ type PlayingPlayer = {
 };
 
 type PlayingState = {
-  phase: "placing" | "bidding" | "revealing" | "result";
+  phase:
+    | "placing"
+    | "bidding"
+    | "revealing"
+    | "result";
   message: string;
 
   currentTurnPlayerId: string;
@@ -73,15 +87,16 @@ export default function App() {
   const [playingState, setPlayingState] =
     useState<PlayingState | null>(null);
 
-  // 優勝者の名前を保存する
   const [winnerName, setWinnerName] =
     useState("");
+
+  const [winnerColor, setWinnerColor] =
+    useState<PlayerColor>("blue");
 
   const shouldShowBackground =
     currentPage !== "playing";
 
   useEffect(() => {
-    // プレイヤーリストの更新を受信
     socket.on(
       "update_players",
       (updatedPlayers: Player[]) => {
@@ -89,14 +104,13 @@ export default function App() {
       }
     );
 
-    // 誰かが開始ボタンを押した時に全員の画面を切り替える
     socket.on("game_started", () => {
       setWinnerName("");
+      setWinnerColor("blue");
       setPlayingState(null);
       setCurrentPage("playing");
     });
 
-    // プレイ中の状態を受信
     socket.on(
       "playing_state",
       (nextPlayingState: PlayingState) => {
@@ -104,7 +118,6 @@ export default function App() {
       }
     );
 
-    // 優勝者が決まった時に全員の画面をリザルトへ移動する
     socket.on(
       "playing_game_won",
       ({
@@ -114,12 +127,15 @@ export default function App() {
         winnerId: string;
         winnerName: string;
       }) => {
-        console.log("game won:", {
-          winnerId,
-          winnerName,
-        });
+        const winner =
+          players.find(
+            (player) => player.id === winnerId
+          );
 
         setWinnerName(winnerName);
+        setWinnerColor(
+          winner?.frameColor ?? "blue"
+        );
         setCurrentPage("result");
       }
     );
@@ -130,7 +146,7 @@ export default function App() {
       socket.off("playing_state");
       socket.off("playing_game_won");
     };
-  }, []);
+  }, [players]);
 
   const handleJoinRoom = (
     id: string,
@@ -147,14 +163,12 @@ export default function App() {
     setCurrentPage("lobby");
   };
 
-  // Ready状態をサーバーに送る
   const handleToggleReady = () => {
     socket.emit("toggle_ready", {
       roomId,
     });
   };
 
-  // ゲーム開始をサーバーに送る
   const handleStartGame = () => {
     socket.emit("start_game", {
       roomId,
@@ -210,8 +224,9 @@ export default function App() {
             onGoToResult={() =>
               setCurrentPage("result")
             }
-            onGameWon={(name) => {
+            onGameWon={(name, color) => {
               setWinnerName(name);
+              setWinnerColor(color);
               setCurrentPage("result");
             }}
           />
@@ -222,6 +237,7 @@ export default function App() {
             winnerName={
               winnerName || "不明なプレイヤー"
             }
+            winnerColor={winnerColor}
             onRematch={() =>
               setCurrentPage("lobby")
             }

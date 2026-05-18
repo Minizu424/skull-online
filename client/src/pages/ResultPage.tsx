@@ -6,20 +6,41 @@ import { VolumeControl } from "../components/VolumeControl";
 import "../styles/ResultPage.css";
 import resultBg from "../assets/back-result.png";
 import timerIcon from "../assets/icon_timer.webp";
+
+import skullBlue from "../assets/skull_icon_blue_double_eye.webp";
+import skullGreen from "../assets/skull_icon_green_double_eye.webp";
+import skullPurple from "../assets/skull_icon_purple_double_eye.webp";
+import skullRed from "../assets/skull_icon_red_double_eye.webp";
+
+type WinnerColor =
+  | "blue"
+  | "green"
+  | "purple"
+  | "red";
+
 type ResultPageProps = {
   winnerName: string;
+
+  winnerColor: WinnerColor;
 
   onRematch: () => void;
 
   onBackToTitle: () => void;
 };
 
+const winnerIconByColor: Record<WinnerColor, string> = {
+  blue: skullBlue,
+  green: skullGreen,
+  purple: skullPurple,
+  red: skullRed,
+};
+
 export function ResultPage({
   winnerName,
+  winnerColor,
   onRematch,
   onBackToTitle,
 }: ResultPageProps) {
-
   const [timeLeft, setTimeLeft] =
     useState(30);
 
@@ -29,7 +50,9 @@ export function ResultPage({
   const [isMuted, setIsMuted] =
     useState(false);
 
-  // カウントダウン
+  const winnerIcon =
+    winnerIconByColor[winnerColor] ?? skullBlue;
+
   useEffect(() => {
     if (timeLeft <= 0) {
       onBackToTitle();
@@ -44,21 +67,22 @@ export function ResultPage({
   }, [timeLeft, onBackToTitle]);
 
   return (
-    <div className="result-page"
-        style={{
-            backgroundImage: `url(${resultBg})`,
-        }}
+    <div
+      className="result-page"
+      style={{
+        backgroundImage: `url(${resultBg})`,
+      }}
     >
-
       <main className="result-page__content">
-
         <h1 className="result-page__title">
           WINNER
         </h1>
 
-        <div className="result-page__skull">
-          ☠
-        </div>
+        <img
+          src={winnerIcon}
+          alt={`${winnerName} icon`}
+          className="result-page__winner-icon"
+        />
 
         <h2 className="result-page__winner-name">
           {winnerName}
@@ -83,7 +107,6 @@ export function ResultPage({
         </div>
 
         <div className="result-page__buttons">
-
           <Button onClick={onRematch}>
             もう一度遊ぶ
           </Button>
@@ -91,7 +114,6 @@ export function ResultPage({
           <Button onClick={onBackToTitle}>
             部屋を出る
           </Button>
-
         </div>
       </main>
 
