@@ -1,17 +1,46 @@
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
 import { ActionButtons } from "../components/ActionButtons";
-import { HandArea } from "../components/HandArea";
 import { PlayerArea } from "../components/PlayerArea";
 import { VolumeControl } from "../components/VolumeControl";
+
+import cardRoseBlueImage from "../assets/card_rose_blue.webp";
+import cardSkullBlueImage from "../assets/card_skull_blue.webp";
+import cardDoubleRoseBlueImage from "../assets/card_Wrose_blue.webp";
+import cardBackBlueImage from "../assets/card_back_blue.webp";
+
+import cardRoseRedImage from "../assets/card_rose_red.webp";
+import cardSkullRedImage from "../assets/card_skull_red.webp";
+import cardDoubleRoseRedImage from "../assets/card_Wrose_red.webp";
+import cardBackRedImage from "../assets/card_back_red.webp";
+
+import cardRoseGreenImage from "../assets/card_rose_green.webp";
+import cardSkullGreenImage from "../assets/card_skull_green.webp";
+import cardDoubleRoseGreenImage from "../assets/card_Wrose_green.webp";
+import cardBackGreenImage from "../assets/card_back_green.webp";
+
+import cardRosePurpleImage from "../assets/card_rose_purple.webp";
+import cardSkullPurpleImage from "../assets/card_skull_purple.webp";
+import cardDoubleRosePurpleImage from "../assets/card_Wrose_purple.webp";
+import cardBackPurpleImage from "../assets/card_back_purple.webp";
+
+import playingMatImage from "../assets/playing_mat.webp";
+import backgroundImage from "../assets/background.webp";
+
 import "../styles/PlayingPage.css";
+
+type CardColor =
+  | "blue"
+  | "green"
+  | "purple"
+  | "red";
 
 type OnlinePlayer = {
   id: string;
   name: string;
   isHost: boolean;
   isReady: boolean;
-  frameColor: "blue" | "green" | "purple" | "red";
+  frameColor: CardColor;
 };
 
 type GamePhase =
@@ -77,6 +106,49 @@ const onlinePlayerPositions: Array<"top" | "left" | "right"> = [
   "right",
 ];
 
+const cardImages: Record<
+  CardColor,
+  Record<CardType | "back", string>
+> = {
+  blue: {
+    rose: cardRoseBlueImage,
+    skull: cardSkullBlueImage,
+    doubleRose: cardDoubleRoseBlueImage,
+    back: cardBackBlueImage,
+  },
+  red: {
+    rose: cardRoseRedImage,
+    skull: cardSkullRedImage,
+    doubleRose: cardDoubleRoseRedImage,
+    back: cardBackRedImage,
+  },
+  green: {
+    rose: cardRoseGreenImage,
+    skull: cardSkullGreenImage,
+    doubleRose: cardDoubleRoseGreenImage,
+    back: cardBackGreenImage,
+  },
+  purple: {
+    rose: cardRosePurpleImage,
+    skull: cardSkullPurpleImage,
+    doubleRose: cardDoubleRosePurpleImage,
+    back: cardBackPurpleImage,
+  },
+};
+
+const getCardImage = (
+  cardType: CardType,
+  color: CardColor
+) => {
+  return cardImages[color][cardType];
+};
+
+const getCardBackImage = (
+  color: CardColor
+) => {
+  return cardImages[color].back;
+};
+
 export function PlayingPage({
   socket,
   roomId,
@@ -84,7 +156,6 @@ export function PlayingPage({
   players,
   playingState,
   onBackToLobby,
-  onGoToResult,
   onGameWon,
 }: PlayingPageProps) {
   const [phase, setPhase] =
@@ -104,21 +175,6 @@ export function PlayingPage({
 
   const [isMuted, setIsMuted] =
     useState(false);
-
-  useEffect(() => {
-  if (timer <= 0) {
-    setMessage("時間切れ！");
-    return;
-  }
-
-  const interval = setInterval(() => {
-    setTimer((prev) => prev - 1);
-  }, 1000);
-
-  return () =>
-    clearInterval(interval);
-
-}, [timer]);
 
   const [selectedCardId, setSelectedCardId] =
     useState<string | null>(null);
@@ -150,13 +206,14 @@ export function PlayingPage({
   const [placedCards, setPlacedCards] =
     useState<RevealedCard[]>([]);
 
-  
-
   const [message, setMessage] =
     useState("カードを1枚出してください");
 
   const [flippingCard, setFlippingCard] =
     useState<RevealedCard | null>(null);
+
+  const [flippingCardColor, setFlippingCardColor] =
+    useState<CardColor>("blue");
 
   const myPlayingPlayer =
     playingState?.players.find(
@@ -232,6 +289,20 @@ export function PlayingPage({
       (card) => card.id === selectedCardId
     );
 
+  const getPlayerColor = (
+    playerId?: string,
+    name?: string
+  ): CardColor => {
+    const onlinePlayer =
+      players.find((player) => player.id === playerId) ??
+      players.find((player) => player.name === name);
+
+    return onlinePlayer?.frameColor ?? "blue";
+  };
+
+  const myCardColor =
+    getPlayerColor(myPlayerId, playerName);
+
   useEffect(() => {
     if (timer <= 0) {
       setMessage("時間切れ！");
@@ -253,11 +324,21 @@ export function PlayingPage({
 
   useEffect(() => {
     const handleRevealStarted = ({
+      targetPlayerId,
       card,
     }: {
       targetPlayerId: string;
       card: RevealedCard;
     }) => {
+      const targetPlayer =
+        players.find(
+          (player) => player.id === targetPlayerId
+        );
+
+      setFlippingCardColor(
+        targetPlayer?.frameColor ?? "blue"
+      );
+
       setFlippingCard(card);
 
       setTimeout(() => {
@@ -276,7 +357,7 @@ export function PlayingPage({
         handleRevealStarted
       );
     };
-  }, [socket]);
+  }, [socket, players]);
 
   useEffect(() => {
     const handleGameWon = ({
@@ -311,8 +392,6 @@ export function PlayingPage({
       socket.off("playing_game_won", handleGameWon);
     };
   }, [socket, playingState?.players, onGameWon]);
-
-  
 
   const handlePlaceCard = () => {
     if (!selectedCard) return;
@@ -487,48 +566,15 @@ export function PlayingPage({
     });
   };
 
-  
-
-  
-  
-
-  
-
   return (
     <div className="playing-page">
       <main className="playing-board">
-        <header className="playing-header">
-          <div>Room: {roomId}</div>
-
-          <div>You: {playerName}</div>
-
-          <div>Players: {players.length}</div>
-
-          <div>
-            Turn:{" "}
-            {isMyTurn
-              ? "あなた"
-              : currentTurnPlayer?.name ?? "不明"}
-          </div>
-
-          <div>Phase: {displayPhase}</div>
-
-          <div>宣言数: {displayBid}</div>
-
-          <div>
-            めくったRose: {displayRevealedCount} / {displayBid}
-          </div>
-
-          <div>
-            勝ち点: {displayMyWinCount} / 2
-          </div>
-
-          <div>Timer: {timer}</div>
-        </header>
-
-        <div className="playing-message">
-          {displayMessage}
-        </div>
+       
+        <img
+          src={backgroundImage}
+          alt="うんち"
+          className="playing-background-image"
+        />
 
         {otherPlayingPlayers.map((player, index) => (
           <PlayerArea
@@ -538,10 +584,19 @@ export function PlayingPage({
             handCount={player.handCards.length}
             fieldCount={player.placedCards.length}
             winCount={player.winCount}
+            isCurrentTurn={
+              playingState?.currentTurnPlayerId === player.id
+            }
           />
         ))}
 
         <section className="my-field">
+          <img
+            src={playingMatImage}
+            alt="playing mat"
+            className="playing-mat-image"
+          />
+
           <div className="field-info">
             <p>
               伏せカード: {totalPlacedCardCount}
@@ -581,6 +636,12 @@ export function PlayingPage({
               (player, playerIndex) => {
                 const position =
                   onlinePlayerPositions[playerIndex];
+
+                const playerColor =
+                  getPlayerColor(
+                    player.id,
+                    player.name
+                  );
 
                 return (
                   <div
@@ -629,11 +690,24 @@ export function PlayingPage({
                               card.isFlipping
                             }
                           >
-                            <span className="card-content">
-                              {card.revealed
-                                ? card.label
-                                : "裏"}
-                            </span>
+                            <img
+                              src={
+                                card.revealed
+                                  ? getCardImage(
+                                      card.type,
+                                      playerColor
+                                    )
+                                  : getCardBackImage(
+                                      playerColor
+                                    )
+                              }
+                              alt={
+                                card.revealed
+                                  ? card.label
+                                  : "裏"
+                              }
+                              className="placed-card-image"
+                            />
                           </button>
                         );
                       }
@@ -680,11 +754,24 @@ export function PlayingPage({
                       card.isFlipping
                     }
                   >
-                    <span className="card-content">
-                      {card.revealed
-                        ? card.label
-                        : "裏"}
-                    </span>
+                    <img
+                      src={
+                        card.revealed
+                          ? getCardImage(
+                              card.type,
+                              myCardColor
+                            )
+                          : getCardBackImage(
+                              myCardColor
+                            )
+                      }
+                      alt={
+                        card.revealed
+                          ? card.label
+                          : "裏"
+                      }
+                      className="placed-card-image"
+                    />
                   </button>
                 );
               })}
@@ -692,11 +779,34 @@ export function PlayingPage({
           </div>
         </section>
 
-        <HandArea
-          handCards={displayHandCards}
-          selectedCardId={selectedCardId}
-          onSelectCard={setSelectedCardId}
-        />
+        <section className="hand-area">
+          {displayHandCards.map((card) => (
+            <button
+              key={card.id}
+              className={`card-button ${
+                selectedCardId === card.id
+                  ? "selected"
+                  : ""
+              }`}
+              onClick={() =>
+                setSelectedCardId(card.id)
+              }
+              disabled={
+                displayPhase !== "placing" ||
+                !isMyTurn
+              }
+            >
+              <img
+                src={getCardImage(
+                  card.type,
+                  myCardColor
+                )}
+                alt={card.label}
+                className="card-image"
+              />
+            </button>
+          ))}
+        </section>
 
         <ActionButtons
           phase={displayPhase}
@@ -708,28 +818,33 @@ export function PlayingPage({
           onBackToLobby={onBackToLobby}
         />
 
-        <div className="dev-buttons">
-          <button onClick={onGoToResult}>
-            勝利扱い
-          </button>
-        </div>
-
         {flippingCard && (
           <div className="flip-overlay">
             <div className="flip-card">
               <div className="flip-card-inner">
                 <div className="flip-card-front">
-                  裏
+                  <img
+                    src={getCardBackImage(flippingCardColor)}
+                    alt="裏"
+                    className="flip-card-image"
+                  />
                 </div>
 
                 <div className="flip-card-back">
-                  {flippingCard.label}
+                  <img
+                    src={getCardImage(
+                      flippingCard.type,
+                      flippingCardColor
+                    )}
+                    alt={flippingCard.label}
+                    className="flip-card-image"
+                  />
                 </div>
               </div>
             </div>
           </div>
         )}
-        
+
         <div className="playing-volume-control">
           <VolumeControl
             volume={volume}

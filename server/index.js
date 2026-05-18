@@ -1,11 +1,20 @@
-// server/index.js
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
+
 app.use(cors());
+
+// React の build 結果を server から配信する
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// React Router / SPA 対応
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 const server = http.createServer(app);
 
@@ -21,6 +30,9 @@ const rooms = {};
 
 // プレイ画面用
 const playingStates = {};
+
+// 成功・失敗後に場を残す時間
+const ROUND_RESULT_DELAY_MS = 5000;
 
 const createInitialHand = (playerId) => [
   {
@@ -246,10 +258,13 @@ const resetRoundAfterSuccess = (state, winnerPlayer) => {
 
   chooseNextRoundStarter(state, winnerPlayer.id);
 
-  state.message =
-    `${winnerPlayer.name} が宣言成功！ ` +
-    `勝ち点 ${winnerPlayer.winCount} / 2 です。` +
-    `次のラウンドです。`;
+  const nextPlayer = state.players.find(
+    (player) => player.id === state.currentTurnPlayerId
+  );
+
+  state.message = nextPlayer
+    ? `${nextPlayer.name} のターンです`
+    : "次のラウンドです";
 };
 
 const resetRoundAfterFailure = (
@@ -266,42 +281,94 @@ const resetRoundAfterFailure = (
 
   chooseNextRoundStarter(state, failedPlayer.id);
 
-  state.message =
-    `${failedPlayer.name} が宣言失敗しました。` +
-    `カードを1枚失いました` +
-    `${lostCard ? `（${lostCard.label}）` : ""}。` +
-    `次のラウンドです。`;
+  const nextPlayer = state.players.find(
+    (player) => player.id === state.currentTurnPlayerId
+  );
+
+  state.message = nextPlayer
+    ? `${nextPlayer.name} のターンです`
+    : "次のラウンドです";
 };
 
 const handleBidSuccess = (roomId, state, challenger) => {
   challenger.winCount += 1;
 
+  state.phase = "result";
+
   if (challenger.winCount >= 2) {
-    state.phase = "result";
     state.message =
       `${challenger.name} が勝ち点2に到達して優勝しました！`;
 
     io.to(roomId).emit("playing_state", state);
 
-    io.to(roomId).emit("playing_game_won", {
-      winnerId: challenger.id,
-      winnerName: challenger.name,
-    });
+    setTimeout(() => {
+      io.to(roomId).emit("playing_game_won", {
+        winnerId: challenger.id,
+        winnerName: challenger.name,
+      });
+    }, ROUND_RESULT_DELAY_MS);
 
     return;
   }
 
-  resetRoundAfterSuccess(state, challenger);
+  state.message =
+    `${challenger.name} が宣言成功しました。`;
 
   io.to(roomId).emit("playing_state", state);
+
+  setTimeout(() => {
+    const latestState = playingStates[roomId];
+
+    if (!latestState) return;
+    if (latestState.phase !== "result") return;
+
+    const latestChallenger =
+      latestState.players.find(
+        (player) => player.id === challenger.id
+      );
+
+    if (!latestChallenger) return;
+
+    resetRoundAfterSuccess(
+      latestState,
+      latestChallenger
+    );
+
+    io.to(roomId).emit("playing_state", latestState);
+  }, ROUND_RESULT_DELAY_MS);
 };
 
 const handleBidFailure = (roomId, state, challenger) => {
-  const lostCard = removeRandomCardFromPlayer(challenger);
-
-  resetRoundAfterFailure(state, challenger, lostCard);
+  state.phase = "result";
+  state.message =
+    `${challenger.name} が宣言失敗しました。`;
 
   io.to(roomId).emit("playing_state", state);
+
+  setTimeout(() => {
+    const latestState = playingStates[roomId];
+
+    if (!latestState) return;
+    if (latestState.phase !== "result") return;
+
+    const latestChallenger =
+      latestState.players.find(
+        (player) => player.id === challenger.id
+      );
+
+    if (!latestChallenger) return;
+
+    const lostCard =
+      removeRandomCardFromPlayer(latestChallenger);
+
+    resetRoundAfterFailure(
+      latestState,
+      latestChallenger,
+      lostCard
+    );
+
+    io.to(roomId).emit("playing_state", latestState);
+  }, ROUND_RESULT_DELAY_MS);
 };
 
 const areAllPlacedCardsRevealed = (state) => {
@@ -816,7 +883,7 @@ io.on("connection", (socket) => {
         }
 
         latestState.message =
-          `${latestTargetPlayer.name} の ${latestTargetCard.label} がめくられました。` +
+          `${latestTargetPlayer.name} のカードがめくられました。` +
           `${latestState.revealedRoseCount} / ${latestState.bid} Roseです。`;
 
         io.to(roomId).emit("playing_state", latestState);

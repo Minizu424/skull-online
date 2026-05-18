@@ -1,9 +1,12 @@
+import playerFrameImage from "../assets/player_frame.webp";
+
 type PlayerAreaProps = {
   position: "top" | "left" | "right";
   name: string;
   handCount: number;
   fieldCount: number;
   winCount: number;
+  isCurrentTurn?: boolean;
 };
 
 export function PlayerArea({
@@ -12,18 +15,31 @@ export function PlayerArea({
   handCount,
   fieldCount,
   winCount,
+  isCurrentTurn = false,
 }: PlayerAreaProps) {
   return (
-    <section
-      className={`player-area ${position}-player`}
+    <div
+      className={`player-area ${position}-player ${
+        isCurrentTurn ? "current-turn-player" : ""
+      }`}
     >
-      <h2>{name}</h2>
+      <img
+        src={playerFrameImage}
+        alt=""
+        className="player-frame-image"
+      />
 
-      <p>
-        手札: {handCount} / 場札: {fieldCount}
-      </p>
+      <div className="player-area-content">
+        <h2>{name}</h2>
 
-      <p>勝利数: 🌹 {winCount}</p>
-    </section>
+        <p>
+          手札: {handCount} / 場札: {fieldCount}
+        </p>
+
+        <p>
+          勝利数: 🌹 {winCount}
+        </p>
+      </div>
+    </div>
   );
 }
