@@ -7,7 +7,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://あなたの-vercel-url.vercel.app",
+  "https://skull-online.vercel.app",
 ];
 
 app.use(
@@ -16,6 +16,10 @@ app.use(
   })
 );
 
+// 先に server を作る
+const server = http.createServer(app);
+
+// その後に io を作る
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
