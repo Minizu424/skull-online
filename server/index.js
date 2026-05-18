@@ -75,9 +75,20 @@ const moveToNextTurn = (state) => {
   );
 
   if (currentIndex === -1) {
-    const firstPlayer = state.players.find(
-      (player) => player.handCards.length > 0
-    );
+    const firstPlayer = state.players.find((player) => {
+      if (state.phase === "placing") {
+        return (
+          player.handCards.length > 0 ||
+          player.placedCards.length > 0
+        );
+      }
+
+      if (state.phase === "bidding") {
+        return !player.passed;
+      }
+
+      return true;
+    });
 
     if (firstPlayer) {
       state.currentTurnPlayerId = firstPlayer.id;
@@ -101,11 +112,16 @@ const moveToNextTurn = (state) => {
       continue;
     }
 
-    if (
-      state.phase === "placing" &&
-      nextPlayer.handCards.length === 0
-    ) {
-      continue;
+    if (state.phase === "placing") {
+      const canPlaceCard =
+        nextPlayer.handCards.length > 0;
+
+      const canStartBidding =
+        nextPlayer.placedCards.length > 0;
+
+      if (!canPlaceCard && !canStartBidding) {
+        continue;
+      }
     }
 
     if (state.phase === "bidding" && nextPlayer.passed) {

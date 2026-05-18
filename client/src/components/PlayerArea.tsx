@@ -37,7 +37,7 @@ export function PlayerArea({
         </p>
 
         <p>
-          勝利数: 🌹 {winCount}
+          勝利数: {winCount}
         </p>
       </div>
     </div>
