@@ -1,20 +1,11 @@
 const express = require("express");
 const http = require("http");
-const path = require("path");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
 
 app.use(cors());
-
-// React の build 結果を server から配信する
-app.use(express.static(path.join(__dirname, "../client/dist")));
-
-// React Router / SPA 対応
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-});
 
 const server = http.createServer(app);
 
@@ -966,6 +957,8 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3001, "0.0.0.0", () => {
-  console.log("server running on port 3001");
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`server running on port ${PORT}`);
 });

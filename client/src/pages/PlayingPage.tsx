@@ -272,7 +272,7 @@ export function PlayingPage({
   const [placedCards, setPlacedCards] =
     useState<RevealedCard[]>([]);
 
-  const [message, setMessage] =
+  const [, setMessage] =
     useState("カードを1枚出してください");
 
   const [flippingCard, setFlippingCard] =
@@ -323,9 +323,6 @@ export function PlayingPage({
 
   const displayPhase =
     playingState?.phase ?? phase;
-
-  const displayMessage =
-    playingState?.message ?? message;
 
   const displayBid =
     playingState?.bid ?? bid;
