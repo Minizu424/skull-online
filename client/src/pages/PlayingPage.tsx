@@ -24,6 +24,22 @@ import cardSkullPurpleImage from "../assets/card_skull_purple.webp";
 import cardDoubleRosePurpleImage from "../assets/card_Wrose_purple.webp";
 import cardBackPurpleImage from "../assets/card_back_purple.webp";
 
+import skullIconBlueNoEyeImage from "../assets/skull_icon_blue_no_eye.webp";
+import skullIconBlueSingleEyeImage from "../assets/skull_icon_blue_single_eye.webp";
+import skullIconBlueDoubleEyeImage from "../assets/skull_icon_blue_double_eye.webp";
+
+import skullIconRedNoEyeImage from "../assets/skull_icon_red_no_eye.webp";
+import skullIconRedSingleEyeImage from "../assets/skull_icon_red_single_eye.webp";
+import skullIconRedDoubleEyeImage from "../assets/skull_icon_red_double_eye.webp";
+
+import skullIconGreenNoEyeImage from "../assets/skull_icon_green_no_eye.webp";
+import skullIconGreenSingleEyeImage from "../assets/skull_icon_green_single_eye.webp";
+import skullIconGreenDoubleEyeImage from "../assets/skull_icon_green_double_eye.webp";
+
+import skullIconPurpleNoEyeImage from "../assets/skull_icon_purple_no_eye.webp";
+import skullIconPurpleSingleEyeImage from "../assets/skull_icon_purple_single_eye.webp";
+import skullIconPurpleDoubleEyeImage from "../assets/skull_icon_purple_double_eye.webp";
+
 import playingMatImage from "../assets/playing_mat.webp";
 import backgroundImage from "../assets/background.webp";
 
@@ -34,6 +50,11 @@ type CardColor =
   | "green"
   | "purple"
   | "red";
+
+type SkullEyeState =
+  | "noEye"
+  | "singleEye"
+  | "doubleEye";
 
 type OnlinePlayer = {
   id: string;
@@ -134,6 +155,48 @@ const cardImages: Record<
     doubleRose: cardDoubleRosePurpleImage,
     back: cardBackPurpleImage,
   },
+};
+
+const skullIconImages: Record<
+  CardColor,
+  Record<SkullEyeState, string>
+> = {
+  blue: {
+    noEye: skullIconBlueNoEyeImage,
+    singleEye: skullIconBlueSingleEyeImage,
+    doubleEye: skullIconBlueDoubleEyeImage,
+  },
+  red: {
+    noEye: skullIconRedNoEyeImage,
+    singleEye: skullIconRedSingleEyeImage,
+    doubleEye: skullIconRedDoubleEyeImage,
+  },
+  green: {
+    noEye: skullIconGreenNoEyeImage,
+    singleEye: skullIconGreenSingleEyeImage,
+    doubleEye: skullIconGreenDoubleEyeImage,
+  },
+  purple: {
+    noEye: skullIconPurpleNoEyeImage,
+    singleEye: skullIconPurpleSingleEyeImage,
+    doubleEye: skullIconPurpleDoubleEyeImage,
+  },
+};
+
+const getSkullEyeState = (
+  winCount: number
+): SkullEyeState => {
+  if (winCount >= 2) return "doubleEye";
+  if (winCount >= 1) return "singleEye";
+
+  return "noEye";
+};
+
+const getSkullIconImage = (
+  color: CardColor,
+  winCount: number
+) => {
+  return skullIconImages[color][getSkullEyeState(winCount)];
 };
 
 const getCardImage = (
@@ -264,9 +327,6 @@ export function PlayingPage({
   const displayBid =
     playingState?.bid ?? bid;
 
-  const displayRevealedCount =
-    playingState?.revealedRoseCount ?? 0;
-
   const displayMyWinCount =
     myPlayingPlayer?.winCount ?? 0;
 
@@ -277,12 +337,6 @@ export function PlayingPage({
     playingState
       ? playingState.currentTurnPlayerId === myPlayerId
       : true;
-
-  const currentTurnPlayer =
-    playingState?.players.find(
-      (player) =>
-        player.id === playingState.currentTurnPlayerId
-    );
 
   const selectedCard =
     displayHandCards.find(
@@ -569,26 +623,40 @@ export function PlayingPage({
   return (
     <div className="playing-page">
       <main className="playing-board">
-       
         <img
           src={backgroundImage}
-          alt="うんち"
+          alt="background"
           className="playing-background-image"
         />
 
-        {otherPlayingPlayers.map((player, index) => (
-          <PlayerArea
-            key={player.id}
-            position={onlinePlayerPositions[index]}
-            name={player.name}
-            handCount={player.handCards.length}
-            fieldCount={player.placedCards.length}
-            winCount={player.winCount}
-            isCurrentTurn={
-              playingState?.currentTurnPlayerId === player.id
-            }
-          />
-        ))}
+        <div className="field-info field-info--screen">
+          <p>
+            伏せカード: {totalPlacedCardCount}
+          </p>
+
+          <p>
+            宣言数: {isChoosingBid ? bid : displayBid}
+          </p>
+        </div>
+
+        {otherPlayingPlayers.map((player, index) => {
+          const position =
+            onlinePlayerPositions[index];
+
+          return (
+            <PlayerArea
+              key={player.id}
+              position={position}
+              name={player.name}
+              handCount={player.handCards.length}
+              fieldCount={player.placedCards.length}
+              winCount={player.winCount}
+              isCurrentTurn={
+                playingState?.currentTurnPlayerId === player.id
+              }
+            />
+          );
+        })}
 
         <section className="my-field">
           <img
@@ -597,14 +665,35 @@ export function PlayingPage({
             className="playing-mat-image"
           />
 
-          <div className="field-info">
-            <p>
-              伏せカード: {totalPlacedCardCount}
-            </p>
+          <div className="mat-skull-icon-layer">
+            {otherPlayingPlayers.map((player, index) => {
+              const position =
+                onlinePlayerPositions[index];
 
-            <p>
-              宣言数: {isChoosingBid ? bid : displayBid}
-            </p>
+              const playerColor =
+                getPlayerColor(player.id, player.name);
+
+              return (
+                <img
+                  key={`mat-skull-icon-${player.id}`}
+                  src={getSkullIconImage(
+                    playerColor,
+                    player.winCount
+                  )}
+                  alt={`${player.name}の勝利アイコン`}
+                  className={`mat-skull-icon mat-skull-icon--${position}`}
+                />
+              );
+            })}
+
+            <img
+              src={getSkullIconImage(
+                myCardColor,
+                displayMyWinCount
+              )}
+              alt="自分の勝利アイコン"
+              className="mat-skull-icon mat-skull-icon--bottom"
+            />
           </div>
 
           {isChoosingBid && isMyTurn && (
