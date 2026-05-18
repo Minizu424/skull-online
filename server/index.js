@@ -5,13 +5,20 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://あなたの-vercel-url.vercel.app",
+];
 
-const server = http.createServer(app);
+app.use(
+  cors({
+    origin: allowedOrigins,
+  })
+);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
