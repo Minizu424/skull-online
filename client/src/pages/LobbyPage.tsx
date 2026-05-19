@@ -4,6 +4,12 @@ import "../styles/LobbyPage.css";
 import { VolumeControl } from "../components/VolumeControl";
 import { useSound } from "../components/SoundProvider";
 
+import crownIcon from "../assets/icon_crown.webp";
+import blueSkullIcon from "../assets/skull_icon_blue_double_eye.webp";
+import greenSkullIcon from "../assets/skull_icon_green_double_eye.webp";
+import purpleSkullIcon from "../assets/skull_icon_purple_double_eye.webp";
+import redSkullIcon from "../assets/skull_icon_red_double_eye.webp";
+
 type Player = {
   id: string;
   name: string;
@@ -19,6 +25,13 @@ type LobbyPageProps = {
   onBackToTitle: () => void;
   onToggleReady: () => void;
   onStartGame: () => void;
+};
+
+const skullIcons = {
+  blue: blueSkullIcon,
+  green: greenSkullIcon,
+  purple: purpleSkullIcon,
+  red: redSkullIcon,
 };
 
 export function LobbyPage({
@@ -43,49 +56,50 @@ export function LobbyPage({
   useEffect(() => {
     const previousPlayerIds = previousPlayerIdsRef.current;
     const currentPlayerIds = players.map((player) => player.id);
-  
+
     const newPlayerIds = currentPlayerIds.filter(
       (id) => !previousPlayerIds.includes(id)
     );
-  
+
     // 初回表示時
     // すでに部屋に人がいる状態で入った場合、既存プレイヤーまでアニメーションしないようにする
     if (previousPlayerIds.length === 0 && players.length > 0) {
       const me = players.find((player) => player.name === playerName);
-  
+
       if (me) {
         setJoinedPlayerIds([me.id]);
-  
+
         const timerId = window.setTimeout(() => {
           setJoinedPlayerIds([]);
         }, 900);
-  
+
         previousPlayerIdsRef.current = currentPlayerIds;
-  
+
         return () => {
           window.clearTimeout(timerId);
         };
       }
     }
-  
+
     // 2回目以降の更新時
     // 新しく増えたプレイヤーだけアニメーションする
     if (newPlayerIds.length > 0) {
       setJoinedPlayerIds(newPlayerIds);
-  
+
       const timerId = window.setTimeout(() => {
         setJoinedPlayerIds([]);
       }, 900);
-  
+
       previousPlayerIdsRef.current = currentPlayerIds;
-  
+
       return () => {
         window.clearTimeout(timerId);
       };
     }
-  
+
     previousPlayerIdsRef.current = currentPlayerIds;
   }, [players, playerName]);
+
   // コピー機能（セキュリティ制限回避版）
   const copyRoomId = () => {
     const textToCopy = roomId;
@@ -162,18 +176,28 @@ export function LobbyPage({
               >
                 {player ? (
                   <div className="player-card__inner">
-                    <h3>
-                      {player.isHost && "👑 "}
-                      {player.name}
+                    {player.isHost && (
+                      <img
+                        src={crownIcon}
+                        alt="host crown"
+                        className="player-card__mini-crown"
+                      />
+                    )}
+
+                    <img
+                      src={skullIcons[player.frameColor]}
+                      alt={`${player.frameColor} skull icon`}
+                      className="player-card__skull-icon"
+                    />
+
+                    <h3 className="player-card__name">
+                      <span className="player-card__name-text">
+                        {player.name}
+                      </span>
+
                       {isMe && (
-                        <span
-                          style={{
-                            fontSize: "0.5em",
-                            opacity: 0.6,
-                          }}
-                        >
-                          {" "}
-                          (あなた)
+                        <span className="player-card__me-label">
+                          あなた
                         </span>
                       )}
                     </h3>
