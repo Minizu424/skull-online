@@ -944,7 +944,7 @@ export function PlayingPage({
           </div>
         )}
 
-        <div className="playing-volume-control">
+        <div className="playing-volume-control volume-control-panel">
           <VolumeControl
             volume={volume}
             setVolume={setVolume}

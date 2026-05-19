@@ -169,7 +169,7 @@ export function TitlePage({
         </div>
       </main>
 
-      <div className="title-page__volume">
+      <div className="title-page__volume volume-control-panel">
         <VolumeControl
           volume={volume}
           setVolume={setVolume}
@@ -222,11 +222,7 @@ export function TitlePage({
               placeholder="ABC123"
               maxLength={6}
             />
-
-            <p className="title-page__room-id-count">
-              {roomId.length} / 6
-            </p>
-
+            
             <div className="title-page__modal-buttons">
               <Button
                 onClick={handleJoinRoom}

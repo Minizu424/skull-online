@@ -229,7 +229,7 @@ export function LobbyPage({
         </div>
       </main>
 
-      <div className="volume-control-area">
+      <div className="volume-control-area volume-control-panel">
         <VolumeControl
           volume={volume}
           setVolume={setVolume}
