@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import { ActionButtons } from "../components/ActionButtons";
 import { PlayerArea } from "../components/PlayerArea";
 import { VolumeControl } from "../components/VolumeControl";
+import { useSound } from "../components/SoundProvider";
 
 import cardRoseBlueImage from "../assets/card_rose_blue.webp";
 import cardSkullBlueImage from "../assets/card_skull_blue.webp";
@@ -42,8 +43,6 @@ import skullIconPurpleDoubleEyeImage from "../assets/skull_icon_purple_double_ey
 
 import playingMatImage from "../assets/playing_mat.webp";
 import backgroundImage from "../assets/background.webp";
-
-import { useSound } from "../components/SoundProvider";
 
 import "../styles/PlayingPage.css";
 
@@ -238,11 +237,12 @@ export function PlayingPage({
   const [timer, setTimer] =
     useState(30);
 
-  const [volume, setVolume] =
-    useState(50);
-
-  const [isMuted, setIsMuted] =
-    useState(false);
+  const {
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+  } = useSound();
 
   const [selectedCardId, setSelectedCardId] =
     useState<string | null>(null);
