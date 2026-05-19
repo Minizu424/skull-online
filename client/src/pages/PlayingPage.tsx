@@ -43,6 +43,8 @@ import skullIconPurpleDoubleEyeImage from "../assets/skull_icon_purple_double_ey
 import playingMatImage from "../assets/playing_mat.webp";
 import backgroundImage from "../assets/background.webp";
 
+import { useSound } from "../components/SoundProvider";
+
 import "../styles/PlayingPage.css";
 
 type CardColor =
