@@ -218,9 +218,14 @@ export default function App() {
             playerName={playerName}
             players={players}
             playingState={playingState}
-            onBackToLobby={() =>
-              setCurrentPage("lobby")
-            }
+            onBackToLobby={() => {
+              socket.emit("return_lobby", {
+                roomId,
+              });
+
+              setPlayingState(null);
+              setCurrentPage("lobby");
+            }}
             onGoToResult={() =>
               setCurrentPage("result")
             }

@@ -277,11 +277,22 @@ export function PlayingPage({
   const [, setMessage] =
     useState("カードを1枚出してください");
 
+  const [toastMessage, setToastMessage] =
+    useState<string | null>(null);
+
   const [flippingCard, setFlippingCard] =
     useState<RevealedCard | null>(null);
 
   const [flippingCardColor, setFlippingCardColor] =
     useState<CardColor>("blue");
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+
+    window.setTimeout(() => {
+      setToastMessage(null);
+    }, 1800);
+  };
 
   const myPlayingPlayer =
     playingState?.players.find(
@@ -365,11 +376,11 @@ export function PlayingPage({
       return;
     }
 
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       setTimer((prev) => prev - 1);
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [timer]);
 
   useEffect(() => {
@@ -397,7 +408,7 @@ export function PlayingPage({
 
       setFlippingCard(card);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         setFlippingCard(null);
       }, 4800);
     };
@@ -441,8 +452,8 @@ export function PlayingPage({
         players.find(
           (player) => player.id === winnerId
         )?.frameColor ?? "blue";
-      
-      setTimeout(() => {
+
+      window.setTimeout(() => {
         onGameWon(
           fixedWinnerName,
           fixedWinnerColor
@@ -455,7 +466,7 @@ export function PlayingPage({
     return () => {
       socket.off("playing_game_won", handleGameWon);
     };
-  }, [socket, playingState?.players, onGameWon]);
+  }, [socket, playingState?.players, players, onGameWon]);
 
   const handlePlaceCard = () => {
     if (!selectedCard) return;
@@ -464,6 +475,7 @@ export function PlayingPage({
     if (playingState) {
       if (!isMyTurn) {
         setMessage("今はあなたのターンではありません");
+        showToast("今はあなたのターンではありません");
         return;
       }
 
@@ -496,21 +508,25 @@ export function PlayingPage({
     setSelectedCardId(null);
     setIsChoosingBid(false);
     setMessage("カードを1枚出しました。宣言できます。");
+    showToast("カードを出しました");
   };
 
   const handleStartBidding = () => {
     if (displayPlacedCards.length === 0) {
       setMessage("先にカードを1枚出してください");
+      showToast("先にカードを1枚出してください");
       return;
     }
 
     if (totalPlacedCardCount === 0) {
       setMessage("場にカードがありません");
+      showToast("場にカードがありません");
       return;
     }
 
     if (playingState && !isMyTurn) {
       setMessage("今はあなたのターンではありません");
+      showToast("今はあなたのターンではありません");
       return;
     }
 
@@ -526,12 +542,14 @@ export function PlayingPage({
 
     if (fixedBid > 16) {
       setMessage("宣言数は16までです");
+      showToast("宣言数は16までです");
       return;
     }
 
     if (playingState) {
       if (!isMyTurn) {
         setMessage("今はあなたのターンではありません");
+        showToast("今はあなたのターンではありません");
         return;
       }
 
@@ -541,6 +559,8 @@ export function PlayingPage({
       });
 
       setIsChoosingBid(false);
+      setBid(fixedBid);
+      showToast(`${fixedBid} 枚で宣言しました`);
       return;
     }
 
@@ -548,14 +568,21 @@ export function PlayingPage({
     setBid(fixedBid);
     setMessage(`あなたが ${fixedBid} 枚で宣言しました。`);
     setIsChoosingBid(false);
+    showToast(`${fixedBid} 枚で宣言しました`);
   };
 
   const handlePass = () => {
     if (displayPhase !== "bidding") return;
 
+    // 宣言数を選んでいる途中でパスした場合、
+    // ローカルの宣言UIと仮のbid表示を必ず戻す
+    setIsChoosingBid(false);
+    setBid(displayBid);
+
     if (playingState) {
       if (!isMyTurn) {
         setMessage("今はあなたのターンではありません");
+        showToast("今はあなたのターンではありません");
         return;
       }
 
@@ -563,10 +590,12 @@ export function PlayingPage({
         roomId,
       });
 
+      showToast("パスしました");
       return;
     }
 
     setMessage("パスしました");
+    showToast("パスしました");
   };
 
   const handleBidDown = () => {
@@ -638,6 +667,12 @@ export function PlayingPage({
           alt="background"
           className="playing-background-image"
         />
+
+        {toastMessage && (
+          <div className="playing-toast">
+            {toastMessage}
+          </div>
+        )}
 
         <div className="field-info field-info--screen">
           <p>

@@ -544,6 +544,30 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("return_lobby", ({ roomId }) => {
+    console.log("return_lobby received:", {
+      roomId,
+      socketId: socket.id,
+    });
+
+    if (rooms[roomId]) {
+      rooms[roomId] = rooms[roomId].map((player) =>
+        player.id === socket.id
+          ? {
+              ...player,
+              isReady: false,
+            }
+          : player
+      );
+
+      io.to(roomId).emit("update_players", rooms[roomId]);
+    }
+
+    if (playingStates[roomId]) {
+      delete playingStates[roomId];
+    }
+  });
+
   socket.on("playing_place_card", ({ roomId, cardId }) => {
     console.log("playing_place_card received:", {
       roomId,

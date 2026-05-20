@@ -882,3 +882,63 @@
 
   transform: translateY(-50%);
 }
+
+/* =========================
+   一時通知
+========================= */
+
+.playing-toast {
+  position: absolute;
+
+  left: 50%;
+  top: 18%;
+
+  transform: translateX(-50%);
+
+  z-index: 100000;
+
+  padding: 14px 28px;
+
+  border: 2px solid rgba(255, 214, 107, 0.9);
+  border-radius: 999px;
+
+  background-color: rgba(0, 0, 0, 0.78);
+  color: white;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(0, 0, 0, 0.75);
+
+  box-shadow:
+    0 0 16px rgba(255, 214, 107, 0.45),
+    0 8px 20px rgba(0, 0, 0, 0.5);
+
+  animation: playing-toast-fade 1.8s ease forwards;
+
+  pointer-events: none;
+}
+
+@keyframes playing-toast-fade {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  78% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.96);
+  }
+}
