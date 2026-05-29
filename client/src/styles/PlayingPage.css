@@ -1,6 +1,7 @@
 .playing-page {
   width: 100vw;
   height: 100vh;
+  height: 100svh;
 
   overflow: hidden;
   box-sizing: border-box;
@@ -944,7 +945,7 @@
 }
 
 /* =========================
-   Responsive
+   Tablet / small screen responsive
 ========================= */
 
 @media (max-width: 1180px) {
@@ -1069,42 +1070,31 @@
   }
 }
 
-/* スマホ縦画面はゲーム盤面が厳しいので横向き推奨にする */
-@media (max-width: 680px) and (orientation: portrait) {
-  .playing-board::after {
-    content: "横向きでプレイしてください";
+/* =========================
+   Playing: iPhone Safari landscape strong fix
+========================= */
 
-    position: absolute;
-    inset: 0;
-
-    z-index: 200000;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background: rgba(0, 0, 0, 0.86);
-    color: white;
-
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-
-    padding: 24px;
-    box-sizing: border-box;
-  }
-}
-
-/* スマホ横画面用 */
 @media (max-height: 520px) and (orientation: landscape) {
+  .playing-page {
+    height: 100svh;
+    min-height: 100svh;
+  }
+
+  .playing-board {
+    height: 100svh;
+  }
+
   .field-info--screen {
     left: 12px;
     top: 10px;
-    padding: 6px 10px;
+
+    padding: 6px 9px;
+    border-width: 2px;
   }
 
   .field-info p {
     font-size: 14px;
+    line-height: 1.45;
   }
 
   .player-area {
@@ -1121,92 +1111,108 @@
   }
 
   .top-player {
-    top: 0;
+    top: 2px;
   }
 
   .left-player {
-    left: 4px;
-    top: 43%;
+    left: 10px;
+    top: 48%;
   }
 
   .right-player {
-    right: 4px;
-    top: 43%;
+    right: 10px;
+    top: 48%;
   }
 
   .my-field {
-    width: 58vw;
-    top: 45%;
+    width: 48vw;
+    top: 49%;
+  }
+
+  .mat-skull-icon-layer {
+    width: 120px;
+    height: 108px;
+  }
+
+  .mat-skull-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .bot-card-stack,
+  .my-card-stack {
+    gap: 4px;
   }
 
   .bot-card-stack--top {
-    top: 42px;
+    top: 32px;
   }
 
   .bot-card-stack--left {
-    left: 52px;
+    left: 42px;
   }
 
   .bot-card-stack--right {
-    right: 52px;
+    right: 42px;
   }
 
   .my-card-stack {
-    bottom: 42px;
+    bottom: 32px;
   }
 
   .placed-card {
-    width: 42px;
-    height: 60px;
+    width: 36px;
+    height: 52px;
     border-radius: 6px;
   }
 
   .hand-area {
-    bottom: 6px;
-    gap: 8px;
+    bottom: 4px;
+    gap: 6px;
+    z-index: 18;
   }
 
   .card-button {
-    width: 58px;
-    height: 82px;
+    width: 50px;
+    height: 72px;
     border-width: 2px;
-    border-radius: 8px;
+    border-radius: 7px;
   }
 
-  .action-area {
-    left: 10px;
-    bottom: 6px;
-    gap: 6px;
-  }
-
-  .bid-controls {
-    top: 35%;
-  }
-
-  .flip-card {
-    width: 150px;
-    height: 220px;
-  }
-
-  .playing-volume-control {
-    display: none;
-  }
-}
-
-@media (max-height: 520px) and (orientation: landscape) {
   .action-area {
     left: 6px;
     bottom: 6px;
 
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+    gap: 3px;
 
-    z-index: 20;
+    z-index: 30;
   }
 
   .action-area .game-button {
-    width: 92px;
-    font-size: 11px;
+    width: 82px;
+    font-size: 10px;
+  }
+
+  .bid-controls {
+    top: 38%;
+    gap: 6px;
+    z-index: 40;
+  }
+
+  .playing-toast {
+    top: 12%;
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+
+  .flip-card {
+    width: 135px;
+    height: 195px;
+  }
+
+  .playing-volume-control {
+    display: none;
   }
 }
