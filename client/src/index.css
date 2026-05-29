@@ -72,6 +72,8 @@ body {
 
   overscroll-behavior: none;
   touch-action: manipulation;
+
+  -webkit-text-size-adjust: 100%;
 }
 
 h1,
@@ -141,19 +143,24 @@ input,
 textarea,
 select {
   font: inherit;
+  font-size: 16px;
 }
 
 /* =========================
    Global portrait guard
-   スマホ縦画面では横向き案内を表示
+   縦画面では横向き案内を表示
 ========================= */
 
-@media (orientation: portrait) and (max-width: 900px) {
-  body::after {
+@media (orientation: portrait) {
+  html::after {
     content: "横向きでプレイしてください";
 
     position: fixed;
-    inset: 0;
+    left: 0;
+    top: 0;
+
+    width: var(--app-width, 100vw);
+    height: var(--app-height, 100vh);
 
     z-index: 9999999;
 

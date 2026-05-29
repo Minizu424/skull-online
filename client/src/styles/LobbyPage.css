@@ -712,48 +712,56 @@
 }
 
 /* =========================
-   Lobby: iPhone landscape strong fix
+   Lobby: real iPhone landscape final fix
+   URLバー込みの実機横画面で1画面に収める
 ========================= */
 
-@media (max-height: 520px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 1000px) {
   .lobby-page {
-    height: 100svh;
-    padding: 10px 16px;
+    width: var(--app-width, 100vw);
+    height: var(--app-height, 100vh);
+
+    padding: 6px 14px;
     overflow: hidden;
   }
 
   .lobby-header {
-    margin-bottom: 8px;
+    height: 54px;
+    margin-bottom: 4px;
     align-items: center;
-  }
-
-  .lobby-header h2 {
-    font-size: 17px;
   }
 
   .room-id-area {
     gap: 8px;
   }
 
+  .lobby-header h2 {
+    font-size: 16px;
+    line-height: 1;
+  }
+
   .lobby-main {
+    flex: 1;
     justify-content: flex-start;
-    gap: 10px;
+    gap: 6px;
+    min-height: 0;
   }
 
   .player-list {
     width: 100%;
+    height: min(210px, calc(var(--app-height, 100vh) - 132px));
 
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: nowrap;
 
-    gap: 8px;
+    gap: 10px;
   }
 
   .player-card {
-    width: 135px;
-    height: 190px;
+    width: 118px;
+    height: 165px;
   }
 
   .player-card__inner,
@@ -761,64 +769,95 @@
     width: 74%;
     height: 78%;
 
-    padding: 8px;
-    gap: 3px;
+    padding: 6px;
+    gap: 2px;
   }
 
   .player-card__mini-crown {
-    width: 28px;
-    height: 28px;
-    top: 5px;
+    width: 24px;
+    height: 24px;
+    top: 4px;
   }
 
   .player-card__skull-icon {
-    width: 82px;
-    height: 82px;
-    margin-bottom: -12px;
+    width: 72px;
+    height: 72px;
+    margin-bottom: -10px;
   }
 
   .player-card__name {
-    font-size: 14px;
-    max-width: 88px;
+    font-size: 12px;
+    max-width: 74px;
   }
 
   .player-card__me-label {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .player-card p {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .player-card--empty h3 {
-    font-size: 17px;
+    font-size: 14px;
   }
 
   .button-row {
-    gap: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .button-row .game-button {
+    width: 118px;
+    font-size: 14px;
   }
 
   .volume-control-area {
-    right: 8px;
-    bottom: 6px;
-  }
-
-  .volume-control-area .volume-control-panel {
-    padding: 5px;
-  }
-
-  .volume-control-area .volume-control__mute-button {
-    width: 30px;
-    height: 30px;
-  }
-
-  .volume-control-area .volume-control__icon {
-    width: 24px;
-    height: 24px;
-  }
-
-  .volume-control-area .volume-control__slider,
-  .volume-control-area .volume-control__value {
     display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .lobby-header {
+    height: 46px;
+    margin-bottom: 2px;
+  }
+
+  .lobby-header h2 {
+    font-size: 14px;
+  }
+
+  .player-list {
+    height: min(185px, calc(var(--app-height, 100vh) - 112px));
+    gap: 8px;
+  }
+
+  .player-card {
+    width: 105px;
+    height: 148px;
+  }
+
+  .player-card__skull-icon {
+    width: 62px;
+    height: 62px;
+    margin-bottom: -8px;
+  }
+
+  .player-card__name {
+    font-size: 11px;
+    max-width: 68px;
+  }
+
+  .player-card p {
+    font-size: 11px;
+  }
+
+  .button-row .game-button {
+    width: 104px;
+    font-size: 12px;
   }
 }
