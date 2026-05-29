@@ -19,11 +19,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-    transform: translateY(-40px);
   gap: 12px;
   position: relative;
   z-index: 1;
-  transform: translateY(60px);
+  transform: translateY(40px);
 }
 
 .result-page__title {
@@ -110,4 +109,63 @@
   height: 36px;
 
   object-fit: contain;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 900px) {
+  .result-page__title {
+    font-size: 72px;
+    letter-spacing: 8px;
+  }
+
+  .result-page__winner-icon {
+    width: 210px;
+    height: 210px;
+  }
+
+  .result-page__winner-name {
+    font-size: 52px;
+  }
+
+  .result-page__buttons {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .result-page__content {
+    transform: translateY(20px);
+  }
+
+  .result-page__title {
+    font-size: 46px;
+    letter-spacing: 4px;
+  }
+
+  .result-page__winner-icon {
+    width: 150px;
+    height: 150px;
+  }
+
+  .result-page__winner-name {
+    font-size: 34px;
+  }
+
+  .result-page__timer-area {
+    margin-bottom: 22px;
+    font-size: 14px;
+  }
+
+  .result-page__buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-page__volume {
+    right: 12px;
+    bottom: 12px;
+  }
 }

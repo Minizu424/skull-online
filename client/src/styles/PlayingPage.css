@@ -942,3 +942,271 @@
     transform: translateX(-50%) scale(0.96);
   }
 }
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 1180px) {
+  .player-area {
+    width: 210px;
+    height: 100px;
+  }
+
+  .player-area h2 {
+    font-size: 14px;
+  }
+
+  .player-area p {
+    font-size: 12px;
+  }
+
+  .my-field {
+    width: min(62vw, 820px);
+  }
+
+  .card-button {
+    width: 92px;
+    height: 130px;
+  }
+
+  .placed-card {
+    width: 64px;
+    height: 90px;
+  }
+
+  .hand-area {
+    gap: 16px;
+    bottom: 18px;
+  }
+
+  .action-area {
+    left: 24px;
+    bottom: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .field-info--screen {
+    left: 16px;
+    top: 14px;
+    padding: 8px 12px;
+  }
+
+  .field-info p {
+    font-size: 16px;
+  }
+
+  .player-area {
+    width: 170px;
+    height: 80px;
+  }
+
+  .left-player {
+    left: 8px;
+  }
+
+  .right-player {
+    right: 8px;
+  }
+
+  .my-field {
+    width: 70vw;
+    top: 46%;
+  }
+
+  .bot-card-stack,
+  .my-card-stack {
+    gap: 6px;
+  }
+
+  .bot-card-stack--top {
+    top: 54px;
+  }
+
+  .bot-card-stack--left {
+    left: 70px;
+  }
+
+  .bot-card-stack--right {
+    right: 70px;
+  }
+
+  .my-card-stack {
+    bottom: 54px;
+  }
+
+  .placed-card {
+    width: 54px;
+    height: 76px;
+  }
+
+  .card-button {
+    width: 76px;
+    height: 108px;
+    border-radius: 10px;
+  }
+
+  .hand-area {
+    gap: 12px;
+    bottom: 12px;
+  }
+
+  .bid-controls {
+    top: 36%;
+    gap: 8px;
+  }
+
+  .playing-toast {
+    top: 14%;
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+
+  .playing-volume-control {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* スマホ縦画面はゲーム盤面が厳しいので横向き推奨にする */
+@media (max-width: 680px) and (orientation: portrait) {
+  .playing-board::after {
+    content: "横向きでプレイしてください";
+
+    position: absolute;
+    inset: 0;
+
+    z-index: 200000;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.86);
+    color: white;
+
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+
+    padding: 24px;
+    box-sizing: border-box;
+  }
+}
+
+/* スマホ横画面用 */
+@media (max-height: 520px) and (orientation: landscape) {
+  .field-info--screen {
+    left: 12px;
+    top: 10px;
+    padding: 6px 10px;
+  }
+
+  .field-info p {
+    font-size: 14px;
+  }
+
+  .player-area {
+    width: 145px;
+    height: 68px;
+  }
+
+  .player-area h2 {
+    font-size: 12px;
+  }
+
+  .player-area p {
+    font-size: 11px;
+  }
+
+  .top-player {
+    top: 0;
+  }
+
+  .left-player {
+    left: 4px;
+    top: 43%;
+  }
+
+  .right-player {
+    right: 4px;
+    top: 43%;
+  }
+
+  .my-field {
+    width: 58vw;
+    top: 45%;
+  }
+
+  .bot-card-stack--top {
+    top: 42px;
+  }
+
+  .bot-card-stack--left {
+    left: 52px;
+  }
+
+  .bot-card-stack--right {
+    right: 52px;
+  }
+
+  .my-card-stack {
+    bottom: 42px;
+  }
+
+  .placed-card {
+    width: 42px;
+    height: 60px;
+    border-radius: 6px;
+  }
+
+  .hand-area {
+    bottom: 6px;
+    gap: 8px;
+  }
+
+  .card-button {
+    width: 58px;
+    height: 82px;
+    border-width: 2px;
+    border-radius: 8px;
+  }
+
+  .action-area {
+    left: 10px;
+    bottom: 6px;
+    gap: 6px;
+  }
+
+  .bid-controls {
+    top: 35%;
+  }
+
+  .flip-card {
+    width: 150px;
+    height: 220px;
+  }
+
+  .playing-volume-control {
+    display: none;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .action-area {
+    left: 6px;
+    bottom: 6px;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+
+    z-index: 20;
+  }
+
+  .action-area .game-button {
+    width: 92px;
+    font-size: 11px;
+  }
+}

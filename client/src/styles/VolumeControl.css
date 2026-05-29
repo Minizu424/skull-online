@@ -56,3 +56,43 @@
 
   flex-shrink: 0;
 }
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 768px) {
+  .volume-control-panel {
+    padding: 8px;
+  }
+
+  .volume-control {
+    gap: 6px;
+  }
+
+  .volume-control__mute-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .volume-control__icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .volume-control__slider {
+    width: 100px;
+  }
+
+  .volume-control__value {
+    width: 38px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 520px) {
+  .volume-control__slider,
+  .volume-control__value {
+    display: none;
+  }
+}
