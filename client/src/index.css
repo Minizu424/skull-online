@@ -191,4 +191,9 @@ select {
 
     pointer-events: auto;
   }
+  html.is-title-page::after {
+    content: none;
+    display: none;
+  }
+
 }

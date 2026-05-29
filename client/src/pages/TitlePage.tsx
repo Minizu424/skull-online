@@ -30,6 +30,16 @@ export function TitlePage({
     setIsMuted,
   } = useSound();
 
+
+  // タイトル画面では縦向きガードを表示しない
+  useEffect(() => {
+    document.documentElement.classList.add("is-title-page");
+
+    return () => {
+      document.documentElement.classList.remove("is-title-page");
+    };
+  }, []);
+
   // 名前復元
   useEffect(() => {
     const savedName = localStorage.getItem("playerName");
